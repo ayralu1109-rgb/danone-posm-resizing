@@ -39,6 +39,8 @@ import os
 
 from PIL import Image
 
+Image.MAX_IMAGE_PIXELS = None  # master BG exceeds PIL's default decompression-bomb limit
+
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
@@ -51,12 +53,22 @@ MM_TO_PX: float = SOURCE_DPI / 25.4   # ≈ 7.874 px / mm
 CONTENT_REF_W_MM = 960.0
 CONTENT_REF_W_PX = round(CONTENT_REF_W_MM * MM_TO_PX)   # ≈ 7559 px
 
-# How much of the canvas width the content reference should occupy.
-# Derived from training-set measurement (6 formats, 330–960mm wide):
-#   left margin ≈ 5.6%,  right margin ≈ 7.3%  →  content fills ≈ 87%
-# Crop region is therefore wider than the content reference by 1/0.87 ≈ 1.15×,
-# which adds natural breathing room at both edges.
-CONTENT_FILL_RATIO = 0.87
+# Fill ratio calibration
+# ----------------------
+# The reference PNG (5罐子+背景+helix+买点.png, 960mm) contains the full
+# content block (can + Helix + buy-point text) plus surrounding atmosphere.
+# Pixel measurement shows the actual content block spans ~87% of the reference
+# width ≈ 835mm.
+#
+# Training-set target (6 formats, 330–960mm):
+#   content block (can-left → text-right) fills ~84% of canvas width
+#   left margin ≈ 8%,  right margin ≈ 9%
+#
+# Required crop_w = 835mm / 0.84 ≈ 993mm
+# → CONTENT_FILL_RATIO = CONTENT_REF_W (960mm) / crop_w (993mm) ≈ 0.97
+#
+# At 0.97: reference fills 97% of crop, content block fills 84% of canvas.
+CONTENT_FILL_RATIO = 1.036  # content block fills 90% of canvas (≈ 835mm / 928mm)
 
 # Can geometric centre in the master BG (bg2000*2000.png, 200 DPI)
 CAN_CX = 6568   # px  (≈ 834 mm from left)
