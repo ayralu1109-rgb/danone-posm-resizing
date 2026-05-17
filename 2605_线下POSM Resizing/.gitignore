@@ -1,0 +1,6 @@
+.DS_Store
+output/
+验证截图/
+__pycache__/
+*.pyc
+*.psd
