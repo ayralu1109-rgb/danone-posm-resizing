@@ -70,18 +70,52 @@ CONTENT_REF_W_PX = round(CONTENT_REF_W_MM * MM_TO_PX)   # ≈ 7559 px
 # At 0.97: reference fills 97% of crop, content block fills 84% of canvas.
 CONTENT_FILL_RATIO = 1.036  # content block fills 90% of canvas (≈ 835mm / 928mm)
 
-# Can geometric centre in the master BG (bg2000*2000.png, 200 DPI)
+# Visual composition anchor in the master BG (bg2000*2000.png, 200 DPI)
+#
+# ⚠️  重要：这不是奶瓶的几何中心，而是视觉构图锚点。
+#
+# 调试记录（2026-05-18）：
+#   - PS 实测几何中心约为 (7022, 8883)
+#   - 但使用 7022 会导致裁切窗口右移，最终画面整体偏左（奶瓶+右侧slogan整体向左偏移）
+#   - 6568 + CAN_TARGET_X=0.311 共同保证"奶瓶+Helix+买点文案"这个视觉整体在画布里居中
+#   - 结论：这是设计师调出的构图参数，不要改成几何测量值
+#   - 如需修改，请先参考 POC_miniprd.md §参数决策日志，并用湛江/汕头实际输出验证视觉效果
+#
 CAN_CX = 6568   # px  (≈ 834 mm from left)
 CAN_CY = 9183   # px  (≈ 1166 mm from top)
 
-# Target position of the can centre inside the crop region (fractions)
-CAN_TARGET_X = 0.311   # 31.1 % from crop left   (can left-of-centre)
+# Target position of the visual anchor inside the crop region (fractions)
+CAN_TARGET_X = 0.311   # 31.1 % from crop left   (can left-of-centre; right side for Helix+买点)
 CAN_TARGET_Y = 0.638   # 63.8 % from crop top    (can slightly below centre)
 
 
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
+def get_can_canvas_pos(canvas_w_px: int, canvas_h_px: int) -> tuple[int, int]:
+    """
+    Return the can centre position in canvas pixel coordinates.
+
+    Because the crop-and-resize pipeline is linear, the can centre always
+    lands at (CAN_TARGET_X × canvas_w, CAN_TARGET_Y × canvas_h) regardless
+    of canvas size.  No BG file needs to be opened.
+
+    Parameters
+    ----------
+    canvas_w_px : int
+    canvas_h_px : int
+
+    Returns
+    -------
+    (can_cx_canvas, can_cy_canvas) : tuple[int, int]
+        Absolute canvas pixel coordinates of the can geometric centre.
+    """
+    return (
+        round(canvas_w_px * CAN_TARGET_X),
+        round(canvas_h_px * CAN_TARGET_Y),
+    )
+
 
 def crop_bg(
     bg_src_path: str,

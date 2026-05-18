@@ -28,12 +28,13 @@ get_element_render_order() -> list[str]
     (layer_order.py)
 """
 
-from .bg_crop import crop_bg
+from .bg_crop import crop_bg, get_can_canvas_pos
 from .element_layout import UpscaleError, compute_layout
 from .layer_order import get_element_render_order
 
 __all__ = [
     "crop_bg",
+    "get_can_canvas_pos",
     "compute_layout",
     "UpscaleError",
     "get_element_render_order",

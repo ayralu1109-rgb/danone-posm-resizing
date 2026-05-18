@@ -223,7 +223,10 @@ PAGE_HTML = """<!DOCTYPE html>
       <input type="number" id="ch" placeholder="高" min="1" step="0.1" required/>
       <span class="size-unit">mm</span>
     </div>
-    <p class="hint" style="margin-top:-14px;margin-bottom:20px;">背景将从主底图居中裁切至此尺寸</p>
+    <p class="hint" style="margin-top:-14px;margin-bottom:4px;">背景将从主底图居中裁切至此尺寸</p>
+    <p id="orientation-warn" class="hint" style="margin-bottom:20px;color:#ff3b30;display:none;">
+      ⚠️ 仅支持竖版（高 &gt; 宽）。横版 / 方形暂不支持。
+    </p>
 
     <div class="section-label">② 可视尺寸（成品框 / 小尺寸）</div>
     <div class="size-row">
@@ -245,6 +248,17 @@ PAGE_HTML = """<!DOCTYPE html>
 const form       = document.getElementById('form');
 const resultDiv  = document.getElementById('result');
 const submitBtn  = document.getElementById('submitBtn');
+const orientWarn = document.getElementById('orientation-warn');
+
+function checkOrientation() {
+  const cw = parseFloat(document.getElementById('cw').value);
+  const ch = parseFloat(document.getElementById('ch').value);
+  const isLandscapeOrSquare = cw > 0 && ch > 0 && cw >= ch;
+  orientWarn.style.display = isLandscapeOrSquare ? 'block' : 'none';
+  submitBtn.disabled = isLandscapeOrSquare;
+}
+document.getElementById('cw').addEventListener('input', checkOrientation);
+document.getElementById('ch').addEventListener('input', checkOrientation);
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -254,6 +268,11 @@ form.addEventListener('submit', async (e) => {
   const ch   = parseFloat(document.getElementById('ch').value);
   const tw   = parseFloat(document.getElementById('tw').value);
   const th   = parseFloat(document.getElementById('th').value);
+
+  if (cw >= ch) {
+    showError('仅支持竖版（高 > 宽）。横版 / 方形暂不支持。');
+    return;
+  }
 
   if (tw >= cw || th >= ch) {
     showError('可视尺寸必须小于画面尺寸，请检查输入。');

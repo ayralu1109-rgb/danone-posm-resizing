@@ -44,6 +44,7 @@ from template import (
     UpscaleError,
     compute_layout,
     crop_bg,
+    get_can_canvas_pos,
     get_element_render_order,
 )
 
@@ -261,31 +262,30 @@ def build_svg(
     def _xl(name: str) -> str:
         return f"{{{XLINK_NS}}}{name}"
 
-    # width/height in mm  →  Illustrator / PS open at exact physical size
-    # viewBox in px       →  internal coordinate system stays at 200 DPI precision
+    # Single mm coordinate system: viewBox = physical canvas size in mm.
+    # All internal element coordinates (px) are converted to mm on write.
+    # This ensures Illustrator opens the file without any unit ambiguity —
+    # viewBox user units == mm == artboard size.  Browser rendering is
+    # identical (1 user unit = 1mm in both cases).
+    px_to_mm = canvas_w_mm / canvas_w      # scale factor: px → mm
+
+    def _mm(px: int | float) -> str:
+        """Format a pixel value as a mm string with 4 decimal places."""
+        return f"{px * px_to_mm:.4f}"
+
     root = ET.Element(_tag("svg"), {
-        "viewBox": f"0 0 {canvas_w} {canvas_h}",
+        "viewBox": f"0 0 {canvas_w_mm:.4f} {canvas_h_mm:.4f}",
         "width":   f"{canvas_w_mm:.4f}mm",
         "height":  f"{canvas_h_mm:.4f}mm",
     })
 
-    # px → mm conversion factor for this canvas
-    px_to_mm = canvas_w_mm / canvas_w
-
-    def _fmt_mm(px: int) -> str:
-        return f"{px * px_to_mm:.2f}"
-
     def _add_image(parent: ET.Element, href: str, x: int, y: int,
                    w: int, h: int) -> ET.Element:
         el = ET.SubElement(parent, _tag("image"), {
-            "x":      str(x),
-            "y":      str(y),
-            "width":  str(w),
-            "height": str(h),
-            "data-x-mm":      _fmt_mm(x),
-            "data-y-mm":      _fmt_mm(y),
-            "data-width-mm":  _fmt_mm(w),
-            "data-height-mm": _fmt_mm(h),
+            "x":      _mm(x),
+            "y":      _mm(y),
+            "width":  _mm(w),
+            "height": _mm(h),
             "preserveAspectRatio": "none",
             "href":   href,          # SVG 1.1 / SVG 2
         })
@@ -304,17 +304,13 @@ def build_svg(
     # Layer 7 – 成品框 (topmost, vector rect, red stroke, no fill)
     trim_group = ET.SubElement(root, _tag("g"), {"id": "成品框"})
     ET.SubElement(trim_group, _tag("rect"), {
-        "x":            str(trim_x),
-        "y":            str(trim_y),
-        "width":        str(trim_w),
-        "height":       str(trim_h),
-        "data-x-mm":      _fmt_mm(trim_x),
-        "data-y-mm":      _fmt_mm(trim_y),
-        "data-width-mm":  _fmt_mm(trim_w),
-        "data-height-mm": _fmt_mm(trim_h),
+        "x":      _mm(trim_x),
+        "y":      _mm(trim_y),
+        "width":  _mm(trim_w),
+        "height": _mm(trim_h),
         "fill":         "none",
         "stroke":       TRIM_STROKE_COLOR,
-        "stroke-width": TRIM_STROKE_WIDTH,
+        "stroke-width": f"{float(TRIM_STROKE_WIDTH) * px_to_mm:.4f}",
     })
 
     ET.indent(root, space="  ")
@@ -339,11 +335,26 @@ def process_city(
     Raises
     ------
     ValueError
-        If the canvas exceeds the master BG dimensions.
+        If the canvas exceeds the master BG dimensions, or if the canvas is
+        landscape orientation (width ≥ height).  Landscape layouts require a
+        separate layout pattern (horizontal_banner_v1) which is not yet
+        implemented — see T-12 in POC_miniprd.md.
     UpscaleError
         If any element requires upscaling (Section 5.4).
     """
     logging.info("[%s] Processing %s ...", spec.city, spec.slug)
+
+    # --- PoC guard: reject landscape / square canvases ---
+    # The current layout rules (element_layout.py) were calibrated exclusively
+    # on portrait training images (W/H 0.59–0.86).  A landscape canvas causes
+    # the title element to fill >57% of the canvas height, making the output
+    # visually broken.  Horizontal banner support is tracked as T-12.
+    if spec.canvas_w_mm >= spec.canvas_h_mm:
+        raise ValueError(
+            f"横版 / 方形画布暂不支持（{spec.canvas_w_mm:.0f}×{spec.canvas_h_mm:.0f}mm，"
+            f"W/H={spec.canvas_w_mm/spec.canvas_h_mm:.2f}）。"
+            "横版排版规则尚未实现，详见 POC_miniprd.md T-12。"
+        )
 
     # Staging directory for this city
     stage_dir   = output_dir / spec.slug
@@ -365,12 +376,15 @@ def process_city(
     trim_offset_y = (spec.canvas_h_px - spec.trim_h_px) // 2
 
     # --- Step 4a: Compute element layout (raises UpscaleError if needed) ---
+    can_cx, can_cy = get_can_canvas_pos(spec.canvas_w_px, spec.canvas_h_px)
     layout = compute_layout(
         trim_w_px=spec.trim_w_px,
         trim_h_px=spec.trim_h_px,
         trim_offset_x=trim_offset_x,
         trim_offset_y=trim_offset_y,
         element_sizes=element_sizes,
+        can_canvas_x=can_cx,
+        can_canvas_y=can_cy,
     )
 
     # --- Step 4b: Copy element PNGs to assets/ (no pixel modification) ---
