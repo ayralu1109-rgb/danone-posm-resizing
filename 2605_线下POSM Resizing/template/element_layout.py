@@ -39,7 +39,7 @@ Four-step layout logic (derived from 7 training images, 330-960mm):
     Height rule for Element 4:
       h4 = th3 × EL3_FINEPRINT_RATIO
       where EL3_FINEPRINT_RATIO = fineprint_ink_bbox / PNG_total_h = 432/727 ≈ 0.594
-      (fineprint ink spans y=[287..719) out of 727px total in 3脚注.png)
+      (fineprint ink spans y=[287..719) out of 727px total in footnote.png)
       w4 is back-calculated from h4 and Element 4's PNG aspect ratio.
 
     Group layout:
@@ -170,7 +170,7 @@ def compute_layout(
     # ------------------------------------------------------------------
     # Step 1 — 标题 (Element 2)：主锚点，水平居中
     # ------------------------------------------------------------------
-    el_name = "2标题无蒙版.png"
+    el_name = "title.png"
     ow, oh = element_sizes[el_name]
     tw2 = _px(W * 0.85)
     _check_upscale(el_name, ow, tw2)
@@ -182,7 +182,7 @@ def compute_layout(
     # ------------------------------------------------------------------
     # Step 2 — 顶部联合 Logo (Element 1)：标题伴生，同中轴，紧贴标题上方
     # ------------------------------------------------------------------
-    el_name = "1顶部联合 logo.png"
+    el_name = "top_logo.png"
     ow, oh = element_sizes[el_name]
     tw1 = _px(tw2 * 0.50)          # Opus calibration: ~47% median, was 0.60 (too wide)
     _check_upscale(el_name, ow, tw1)
@@ -207,14 +207,14 @@ def compute_layout(
     #     group_bottom = trim_bottom − top_logo_margin
     #     top_logo_margin = y1 − trim_top（元素 1 顶边距成品框顶的距离）
     # ------------------------------------------------------------------
-    # fineprint ink 范围在 3脚注.png 中：y=[287..719) / 727px = 432/727
+    # fineprint ink 范围在 footnote.png 中：y=[287..719) / 727px = 432/727
     EL3_FINEPRINT_RATIO = 432 / 727  # ≈ 0.594
     INNER_GAP_RATIO     = 0.02       # 元素 3 右缘 ↔ 元素 4 左缘间距（2% W）
     # group 总宽 ≈ 标题宽 × 1.02（group 比标题略宽，训练集目测一致）
     GROUP_TO_TITLE_RATIO = 1.02
 
-    ow3, oh3 = element_sizes["3脚注.png"]
-    ow4, oh4 = element_sizes["4右下角 logo.png"]
+    ow3, oh3 = element_sizes["footnote.png"]
+    ow4, oh4 = element_sizes["corner_logo.png"]
 
     inner_gap = _px(W * INNER_GAP_RATIO)
 
@@ -228,13 +228,13 @@ def compute_layout(
     # 反解 tw3：tw3 + inner_gap + tw3 × K = group_target_w
     group_target_w = _px(tw2 * GROUP_TO_TITLE_RATIO)
     tw3 = _px((group_target_w - inner_gap) / (1 + el3_to_el4_w_ratio))
-    _check_upscale("3脚注.png", ow3, tw3)
+    _check_upscale("footnote.png", ow3, tw3)
     th3 = _scaled_h(ow3, oh3, tw3)
 
     # 元素 4 尺寸由 fineprint ink 高度 → 宽高比反推
     th4 = _px(th3 * EL3_FINEPRINT_RATIO)
     tw4 = _scaled_w(ow4, oh4, th4)
-    _check_upscale("4右下角 logo.png", ow4, tw4)
+    _check_upscale("corner_logo.png", ow4, tw4)
 
     # Group 尺寸与水平居中
     inner_gap = _px(W * INNER_GAP_RATIO)
@@ -247,18 +247,18 @@ def compute_layout(
 
     x3 = group_x
     y3 = group_bottom - th3
-    layout["3脚注.png"] = {"x": x3, "y": y3, "w": tw3, "h": th3}
+    layout["footnote.png"] = {"x": x3, "y": y3, "w": tw3, "h": th3}
 
     x4 = group_x + tw3 + inner_gap
     y4 = group_bottom - th4
-    layout["4右下角 logo.png"] = {"x": x4, "y": y4, "w": tw4, "h": th4}
+    layout["corner_logo.png"] = {"x": x4, "y": y4, "w": tw4, "h": th4}
 
     # ------------------------------------------------------------------
     # Step 4 — 原装进口 Icon (Element 6)：辅助印章，罐心相对定位
     #   中心 Y = 成品框顶 + (罐心 trim-Y) × 0.73
     #   (训练集主样本均值 0.72-0.76；原值 0.61 偏高，2026-05-18 校准)
     # ------------------------------------------------------------------
-    el_name = "6原装进口.png"
+    el_name = "imported.png"
     ow, oh = element_sizes[el_name]
     tw6 = _px(W * 0.15)                           # Opus: median ~14%; was 22% (too large, must be < el4)
     _check_upscale(el_name, ow, tw6)

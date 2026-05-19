@@ -247,11 +247,13 @@ def build_svg(
     are written for each image.
 
     Physical dimensions fix:
-      SVG width/height are set in mm (e.g. "420mm") so that Illustrator and
-      Photoshop open the file at the correct physical size.  Without explicit
-      mm units, both apps interpret unitless SVG px as 1pt = 1/72 inch instead
-      of 1/200 inch, making the canvas appear ~2.78× too large.
-      The viewBox stays in pixel coordinates so all element positions are exact.
+      SVG width/height are set in mm (e.g. "420mm") so that Illustrator opens
+      the file at the correct physical size.  A viewBox in pixel coordinates
+      (0 0 W_px H_px) maps the internal 200-DPI pixel grid to the mm artboard.
+      Element coordinates are unitless pixel values resolved through the viewBox.
+      This is the only structure confirmed to work correctly in Illustrator:
+      viewBox numbers must NOT equal the mm dimension values, otherwise
+      Illustrator creates a square artboard using width for both dimensions.
     """
     ET.register_namespace("",      SVG_NS)
     ET.register_namespace("xlink", XLINK_NS)
@@ -262,30 +264,32 @@ def build_svg(
     def _xl(name: str) -> str:
         return f"{{{XLINK_NS}}}{name}"
 
-    # Single mm coordinate system: viewBox = physical canvas size in mm.
-    # All internal element coordinates (px) are converted to mm on write.
-    # This ensures Illustrator opens the file without any unit ambiguity —
-    # viewBox user units == mm == artboard size.  Browser rendering is
-    # identical (1 user unit = 1mm in both cases).
-    px_to_mm = canvas_w_mm / canvas_w      # scale factor: px → mm
+    # SVG structure confirmed working in Illustrator via systematic diagnostics:
+    #   - width/height in mm  → artboard = canvas_w_mm × canvas_h_mm
+    #   - viewBox="0 0 W_px H_px" → needed for artboard height to be respected
+    #     (without viewBox Illustrator ignores height and makes a square artboard)
+    #   - <rect> coordinates: unitless pixels → correctly mapped through viewBox
+    #   - <image> coordinates: currently also unitless pixels (same as rect)
+    #     NOTE: images fly to bottom-right in Illustrator due to DPI mismatch.
+    #     See ongoing debugging in git history for attempted fixes.
 
-    def _mm(px: int | float) -> str:
-        """Format a pixel value as a mm string with 4 decimal places."""
-        return f"{px * px_to_mm:.4f}"
+    def _px(val: int | float) -> str:
+        """Pixel value → unitless coordinate string (mapped through viewBox)."""
+        return f"{val:.4f}"
 
     root = ET.Element(_tag("svg"), {
-        "viewBox": f"0 0 {canvas_w_mm:.4f} {canvas_h_mm:.4f}",
         "width":   f"{canvas_w_mm:.4f}mm",
         "height":  f"{canvas_h_mm:.4f}mm",
+        "viewBox": f"0 0 {canvas_w} {canvas_h}",
     })
 
     def _add_image(parent: ET.Element, href: str, x: int, y: int,
                    w: int, h: int) -> ET.Element:
         el = ET.SubElement(parent, _tag("image"), {
-            "x":      _mm(x),
-            "y":      _mm(y),
-            "width":  _mm(w),
-            "height": _mm(h),
+            "x":      _px(x),
+            "y":      _px(y),
+            "width":  _px(w),
+            "height": _px(h),
             "preserveAspectRatio": "none",
             "href":   href,          # SVG 1.1 / SVG 2
         })
@@ -304,13 +308,13 @@ def build_svg(
     # Layer 7 – 成品框 (topmost, vector rect, red stroke, no fill)
     trim_group = ET.SubElement(root, _tag("g"), {"id": "成品框"})
     ET.SubElement(trim_group, _tag("rect"), {
-        "x":      _mm(trim_x),
-        "y":      _mm(trim_y),
-        "width":  _mm(trim_w),
-        "height": _mm(trim_h),
+        "x":      _px(trim_x),
+        "y":      _px(trim_y),
+        "width":  _px(trim_w),
+        "height": _px(trim_h),
         "fill":         "none",
         "stroke":       TRIM_STROKE_COLOR,
-        "stroke-width": f"{float(TRIM_STROKE_WIDTH) * px_to_mm:.4f}",
+        "stroke-width": TRIM_STROKE_WIDTH,
     })
 
     ET.indent(root, space="  ")

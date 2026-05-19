@@ -13,11 +13,11 @@ unconditionally by the Processing Engine as the first and last layers.
 
 Full layer stack (Section 5.5):
   1. bg.png              ← Processing Engine writes this first
-  2. 2标题无蒙版.png
-  3. 6原装进口.png
-  4. 1顶部联合 logo.png
-  5. 3脚注.png
-  6. 4右下角 logo.png
+  2. title.png
+  3. imported.png
+  4. top_logo.png
+  5. footnote.png
+  6. corner_logo.png
   7. <g id="成品框">     ← Processing Engine writes this last
 """
 
@@ -41,9 +41,9 @@ def get_element_render_order() -> List[str]:
         ``compute_layout()`` and the filenames copied into ``assets/``.
     """
     return [
-        "2标题无蒙版.png",
-        "6原装进口.png",
-        "1顶部联合 logo.png",
-        "3脚注.png",
-        "4右下角 logo.png",
+        "title.png",
+        "imported.png",
+        "top_logo.png",
+        "footnote.png",
+        "corner_logo.png",
     ]
