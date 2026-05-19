@@ -264,32 +264,45 @@ def build_svg(
     def _xl(name: str) -> str:
         return f"{{{XLINK_NS}}}{name}"
 
-    # SVG structure confirmed working in Illustrator via systematic diagnostics:
-    #   - width/height in mm  → artboard = canvas_w_mm × canvas_h_mm
-    #   - viewBox="0 0 W_px H_px" → needed for artboard height to be respected
-    #     (without viewBox Illustrator ignores height and makes a square artboard)
-    #   - <rect> coordinates: unitless pixels → correctly mapped through viewBox
-    #   - <image> coordinates: currently also unitless pixels (same as rect)
-    #     NOTE: images fly to bottom-right in Illustrator due to DPI mismatch.
-    #     See ongoing debugging in git history for attempted fixes.
+    # SVG coordinate strategy — pt-based viewBox:
+    #
+    # Illustrator applies two different interpretations to SVG coordinates:
+    #   • <rect> / vector shapes  → honour the viewBox coordinate mapping
+    #   • <image> (linked PNG)    → treat x/y/w/h directly as pt values,
+    #                               ignoring viewBox
+    #
+    # By using a pt-based viewBox (1 user-unit = 1pt) the two interpretations
+    # converge: the viewBox maps pt → mm correctly, AND Illustrator's direct
+    # pt reading also places the image at the right physical position.
+    #
+    # Formula:  1 px (at 200 DPI) = 1/200 inch = 72/200 pt = 0.36 pt
+    #   canvas_w_pt = canvas_w_mm × (72/25.4)
+    #   element_pt  = element_px  × (72/200)  [= px × canvas_w_pt/canvas_w_px]
+    #
+    # PNG assets stay at 200 DPI — no metadata change needed.
 
-    def _px(val: int | float) -> str:
-        """Pixel value → unitless coordinate string (mapped through viewBox)."""
-        return f"{val:.4f}"
+    MM_TO_PT = 72.0 / 25.4                    # ≈ 2.8346 pt/mm
+    canvas_w_pt = canvas_w_mm * MM_TO_PT
+    canvas_h_pt = canvas_h_mm * MM_TO_PT
+    px_to_pt    = canvas_w_pt / canvas_w       # ≈ 0.36 pt/px  (200 DPI → pt)
+
+    def _pt(val: int | float) -> str:
+        """Pixel value → pt coordinate string for both <image> and <rect>."""
+        return f"{val * px_to_pt:.4f}"
 
     root = ET.Element(_tag("svg"), {
         "width":   f"{canvas_w_mm:.4f}mm",
         "height":  f"{canvas_h_mm:.4f}mm",
-        "viewBox": f"0 0 {canvas_w} {canvas_h}",
+        "viewBox": f"0 0 {canvas_w_pt:.4f} {canvas_h_pt:.4f}",
     })
 
     def _add_image(parent: ET.Element, href: str, x: int, y: int,
                    w: int, h: int) -> ET.Element:
         el = ET.SubElement(parent, _tag("image"), {
-            "x":      _px(x),
-            "y":      _px(y),
-            "width":  _px(w),
-            "height": _px(h),
+            "x":      _pt(x),
+            "y":      _pt(y),
+            "width":  _pt(w),
+            "height": _pt(h),
             "preserveAspectRatio": "none",
             "href":   href,          # SVG 1.1 / SVG 2
         })
@@ -308,13 +321,13 @@ def build_svg(
     # Layer 7 – 成品框 (topmost, vector rect, red stroke, no fill)
     trim_group = ET.SubElement(root, _tag("g"), {"id": "成品框"})
     ET.SubElement(trim_group, _tag("rect"), {
-        "x":      _px(trim_x),
-        "y":      _px(trim_y),
-        "width":  _px(trim_w),
-        "height": _px(trim_h),
+        "x":      _pt(trim_x),
+        "y":      _pt(trim_y),
+        "width":  _pt(trim_w),
+        "height": _pt(trim_h),
         "fill":         "none",
         "stroke":       TRIM_STROKE_COLOR,
-        "stroke-width": TRIM_STROKE_WIDTH,
+        "stroke-width": f"{float(TRIM_STROKE_WIDTH) * px_to_pt:.4f}",
     })
 
     ET.indent(root, space="  ")
