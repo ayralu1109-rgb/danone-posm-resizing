@@ -2,13 +2,15 @@
 app.py  —  POSM 自动排版演示界面
 =========================================
 启动：python3 app.py
-浏览器打开：http://localhost:5000
+浏览器打开：http://localhost:8080
 """
 
 from __future__ import annotations
 
 import io
 import logging
+import os
+import signal
 import shutil
 import tempfile
 import zipfile
@@ -407,6 +409,11 @@ def generate():
     )
 
 
+@app.route("/health")
+def health():
+    return jsonify(status="ok"), 200
+
+
 @app.route("/download/<path:filename>")
 def download(filename: str):
     zip_path = Path(__file__).parent / "output" / filename
@@ -419,11 +426,18 @@ def download(filename: str):
 # Entry point
 # ---------------------------------------------------------------------------
 
+def _handle_sigterm(signum, frame):
+    logging.info("Received SIGTERM, shutting down gracefully...")
+    raise SystemExit(0)
+
+
 if __name__ == "__main__":
+    signal.signal(signal.SIGTERM, _handle_sigterm)
+    port = int(os.environ.get("PORT", 8080))
     print()
     print("  ╔══════════════════════════════════════╗")
     print("  ║  POSM 自动排版演示界面已启动           ║")
-    print("  ║  浏览器打开 → http://localhost:8080    ║")
+    print(f"  ║  浏览器打开 → http://localhost:{port}    ║")
     print("  ╚══════════════════════════════════════╝")
     print()
-    app.run(host="0.0.0.0", port=8080, debug=False)
+    app.run(host="0.0.0.0", port=port, debug=False)
