@@ -177,6 +177,39 @@ def compute_layout(
     th2 = _scaled_h(ow, oh, tw2)
     x2 = ox + _px((W - tw2) / 2)
     y2 = oy + _px(H * 0.13)        # 距成品框顶部 13%（训练集校准，原值 9% 偏高）
+    # ------------------------------------------------------------------
+    # Title Height Guard — 预算印章顶边，等比缩小标题防重叠
+    #
+    # 印章的 Y 坐标由罐心独立决定，与标题无依赖。当画布较小时（训练集最小
+    # 短边约 150mm），标题高度按宽高比推算后可能下压到印章区域。
+    # 修复：在确认标题尺寸前，先预算印章顶边 (y6_prelim)，若标题底边
+    # 超出约束则等比缩小 tw2，重新推算 th2 并重新居中 x2。
+    # ------------------------------------------------------------------
+    ow6_pre, oh6_pre = element_sizes["imported.png"]
+    tw6_pre = _px(W * 0.15)
+    th6_pre = _scaled_h(ow6_pre, oh6_pre, tw6_pre)
+    if can_trim_y > 0:
+        stamp_center_y_pre = oy + _px(can_trim_y * 0.73)
+    else:
+        stamp_center_y_pre = oy + _px(H * 0.47)
+    y6_pre = stamp_center_y_pre - th6_pre // 2
+
+    TITLE_STAMP_GAP = _px(H * 0.02)   # 标题底边与印章顶边的最小安全间距（2% H）
+    title_bottom_limit = y6_pre - TITLE_STAMP_GAP
+
+    if y2 + th2 > title_bottom_limit:
+        th2_max = title_bottom_limit - y2
+        if th2_max > _px(H * 0.05):   # 最低保留 5% H 的标题高度
+            scale = th2_max / th2
+            tw2 = _px(tw2 * scale)
+            th2 = _scaled_h(ow, oh, tw2)
+            x2 = ox + _px((W - tw2) / 2)
+            logger.debug(
+                "[Title guard] canvas trim %dx%d px — th2 capped: %d → %d  "
+                "(y6_prelim=%d, limit=%d)",
+                W, H, _px(th2 / scale), th2, y6_pre, title_bottom_limit,
+            )
+
     layout[el_name] = {"x": x2, "y": y2, "w": tw2, "h": th2}
 
     # ------------------------------------------------------------------
@@ -297,11 +330,14 @@ def compute_layout(
     seal_cx     = x6 + tw6 // 2   # seal centre X
     seal_bottom = y6 + th6
 
+    # Bottom group top edge (el3 top, which is the higher of the two bottom elements)
+    bottom_group_top = y3   # y3 ≤ y4 because th3 ≥ th4
+
     x_overlap = seal_cx     > protect_left
     y_overlap = seal_bottom > protect_top
 
     if x_overlap and y_overlap:
-        # Stage 1: move UP
+        # Stage 1: move UP to clear can body
         title_bottom  = y2 + th2           # bottom edge of title element
         y6_ideal      = protect_top - th6 - avoidance_gap_h
         y6_new        = max(y6_ideal, title_bottom + avoidance_gap_h)
@@ -323,6 +359,21 @@ def compute_layout(
                 x6, x6_new, protect_left,
             )
             x6 = x6_new
+
+    # ------------------------------------------------------------------
+    # Stamp ↔ Bottom group collision
+    # Independent of can-body avoidance: if stamp bottom enters the bottom
+    # group area, push stamp UP.  Floor = title bottom (same as above).
+    # ------------------------------------------------------------------
+    if (y6 + th6) > bottom_group_top - avoidance_gap_h:
+        title_bottom = y2 + th2
+        y6_ideal     = bottom_group_top - th6 - avoidance_gap_h
+        y6_new       = max(y6_ideal, title_bottom + avoidance_gap_h)
+        logger.debug(
+            "[El6 ↔ bottom-group] stamp bottom %d > group top %d — pushed y6: %d → %d",
+            y6 + th6, bottom_group_top, y6, y6_new,
+        )
+        y6 = y6_new
 
     layout[el_name] = {"x": x6, "y": y6, "w": tw6, "h": th6}
 

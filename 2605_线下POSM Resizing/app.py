@@ -33,6 +33,25 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(message)s")
 # 预加载元素尺寸（只读一次）
 ELEMENT_SIZES = _load_element_sizes(ELEMENTS_DIR)
 
+# 各元素目标宽度占成品框宽的比例（与 element_layout.py 保持一致）
+_ELEM_TRIM_W_RATIOS: dict[str, float] = {
+    "title.png":       0.85,
+    "top_logo.png":    0.85 * 0.50,
+    "imported.png":    0.15,
+    "footnote.png":    0.72,
+    "corner_logo.png": 0.12,
+}
+_DPI = 200
+
+# 计算成品框宽度上限：对所有元素，orig_w / ratio 就是最大 trim_w_px
+# 取最小值（最严格约束），换算为 mm 并向下取整
+TRIM_MAX_W_MM: int = int(min(
+    ELEMENT_SIZES[fname][0] / ratio * (25.4 / _DPI)
+    for fname, ratio in _ELEM_TRIM_W_RATIOS.items()
+    if fname in ELEMENT_SIZES
+))
+logging.info("元素像素约束：成品框宽度上限 = %d mm", TRIM_MAX_W_MM)
+
 # ---------------------------------------------------------------------------
 # HTML 页面（单文件，无需 templates/ 目录）
 # ---------------------------------------------------------------------------
@@ -220,24 +239,23 @@ PAGE_HTML = """<!DOCTYPE html>
 
     <div class="section-label">① 画面尺寸（画布 / 大尺寸）</div>
     <div class="size-row">
-      <input type="number" id="cw" placeholder="宽" min="1" step="0.1" required/>
+      <input type="number" id="cw" placeholder="宽度" min="150" step="0.1" required/>
       <span class="size-sep">×</span>
-      <input type="number" id="ch" placeholder="高" min="1" step="0.1" required/>
+      <input type="number" id="ch" placeholder="高度" min="150" step="0.1" required/>
       <span class="size-unit">mm</span>
     </div>
     <p class="hint" style="margin-top:-14px;margin-bottom:4px;">背景将从主底图居中裁切至此尺寸</p>
-    <p id="orientation-warn" class="hint" style="margin-bottom:20px;color:#ff3b30;display:none;">
-      ⚠️ 仅支持竖版（高 &gt; 宽）。横版 / 方形暂不支持。
-    </p>
+    <p id="canvas-warn" class="hint" style="margin-bottom:20px;color:#ff3b30;display:none;"></p>
 
     <div class="section-label">② 可视尺寸（成品框 / 小尺寸）</div>
     <div class="size-row">
-      <input type="number" id="tw" placeholder="宽" min="1" step="0.1" required/>
+      <input type="number" id="tw" placeholder="宽度" min="150" step="0.1" required/>
       <span class="size-sep">×</span>
-      <input type="number" id="th" placeholder="高" min="1" step="0.1" required/>
+      <input type="number" id="th" placeholder="高度" min="150" step="0.1" required/>
       <span class="size-unit">mm</span>
     </div>
-    <p class="hint" style="margin-top:-14px;margin-bottom:24px;">红色成品框居中叠加，元素定位基准</p>
+    <p class="hint" style="margin-top:-14px;margin-bottom:4px;">红色成品框居中叠加，元素定位基准（宽度最大 __TRIM_MAX_W_MM__ mm）</p>
+    <p id="trim-warn" class="hint" style="margin-bottom:24px;color:#ff3b30;display:none;"></p>
 
     <hr class="divider"/>
     <button class="btn btn-primary" type="submit" id="submitBtn">生成 ZIP 交付包</button>
@@ -250,17 +268,59 @@ PAGE_HTML = """<!DOCTYPE html>
 const form       = document.getElementById('form');
 const resultDiv  = document.getElementById('result');
 const submitBtn  = document.getElementById('submitBtn');
-const orientWarn = document.getElementById('orientation-warn');
+const canvasWarn = document.getElementById('canvas-warn');
+const trimWarn   = document.getElementById('trim-warn');
+const MIN_MM          = 150;
+const TRIM_MIN_RATIO  = 0.80;   // 可视尺寸最小为画面尺寸的 80%（真实数据下限 ~88%，此处留安全余量）
+const TRIM_MAX_W_MM   = __TRIM_MAX_W_MM__;  // 由元素 PNG 原始像素决定的成品框宽度上限
 
-function checkOrientation() {
+function validateFields() {
   const cw = parseFloat(document.getElementById('cw').value);
   const ch = parseFloat(document.getElementById('ch').value);
-  const isLandscapeOrSquare = cw > 0 && ch > 0 && cw >= ch;
-  orientWarn.style.display = isLandscapeOrSquare ? 'block' : 'none';
-  submitBtn.disabled = isLandscapeOrSquare;
+  const tw = parseFloat(document.getElementById('tw').value);
+  const th = parseFloat(document.getElementById('th').value);
+  let hasError = false;
+
+  // 画面尺寸校验
+  let canvasMsg = '';
+  if (cw > 0 && cw < MIN_MM) canvasMsg = `⚠️ 宽度不能小于 ${MIN_MM}mm`;
+  else if (ch > 0 && ch < MIN_MM) canvasMsg = `⚠️ 高度不能小于 ${MIN_MM}mm`;
+  else if (cw > 0 && ch > 0 && cw >= ch) canvasMsg = '⚠️ 高度必须大于宽度（仅支持竖版）';
+  canvasWarn.textContent = canvasMsg;
+  canvasWarn.style.display = canvasMsg ? 'block' : 'none';
+  if (canvasMsg) hasError = true;
+
+  // 可视尺寸校验
+  let trimMsg = '';
+  if (tw > 0 && tw < MIN_MM) {
+    trimMsg = `⚠️ 宽度不能小于 ${MIN_MM}mm`;
+  } else if (th > 0 && th < MIN_MM) {
+    trimMsg = `⚠️ 高度不能小于 ${MIN_MM}mm`;
+  } else if (tw > 0 && th > 0 && tw >= th) {
+    trimMsg = '⚠️ 高度必须大于宽度（仅支持竖版）';
+  } else if (cw > 0 && tw > 0 && tw >= cw) {
+    trimMsg = '⚠️ 可视宽度必须小于画面宽度';
+  } else if (ch > 0 && th > 0 && th >= ch) {
+    trimMsg = '⚠️ 可视高度必须小于画面高度';
+  } else if (cw > 0 && tw > 0 && tw < cw * TRIM_MIN_RATIO) {
+    const minW = Math.ceil(cw * TRIM_MIN_RATIO);
+    trimMsg = `⚠️ 可视宽度偏小（最小约 ${minW}mm，即画面宽度的 ${Math.round(TRIM_MIN_RATIO*100)}%）`;
+  } else if (ch > 0 && th > 0 && th < ch * TRIM_MIN_RATIO) {
+    const minH = Math.ceil(ch * TRIM_MIN_RATIO);
+    trimMsg = `⚠️ 可视高度偏小（最小约 ${minH}mm，即画面高度的 ${Math.round(TRIM_MIN_RATIO*100)}%）`;
+  } else if (tw > 0 && tw > TRIM_MAX_W_MM) {
+    trimMsg = `⚠️ 可视宽度超出上限（当前 ${tw}mm，最大 ${TRIM_MAX_W_MM}mm）——元素 PNG 原始像素不足，放大会模糊`;
+  }
+  trimWarn.textContent = trimMsg;
+  trimWarn.style.display = trimMsg ? 'block' : 'none';
+  if (trimMsg) hasError = true;
+
+  submitBtn.disabled = hasError;
 }
-document.getElementById('cw').addEventListener('input', checkOrientation);
-document.getElementById('ch').addEventListener('input', checkOrientation);
+
+['cw','ch','tw','th'].forEach(id =>
+  document.getElementById(id).addEventListener('input', validateFields)
+);
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -272,12 +332,32 @@ form.addEventListener('submit', async (e) => {
   const th   = parseFloat(document.getElementById('th').value);
 
   if (cw >= ch) {
-    showError('仅支持竖版（高 > 宽）。横版 / 方形暂不支持。');
+    showError('画面尺寸：高度必须大于宽度（仅支持竖版）。');
+    return;
+  }
+  if (tw >= th) {
+    showError('可视尺寸：高度必须大于宽度（仅支持竖版）。');
+    return;
+  }
+  if ([cw, ch, tw, th].some(v => v < MIN_MM)) {
+    showError(`所有尺寸不能小于 ${MIN_MM}mm。`);
     return;
   }
 
   if (tw >= cw || th >= ch) {
     showError('可视尺寸必须小于画面尺寸，请检查输入。');
+    return;
+  }
+  if (tw < cw * TRIM_MIN_RATIO) {
+    showError(`可视宽度 ${tw}mm 偏小（画面宽 ${cw}mm，可视宽应 ≥ ${Math.ceil(cw * TRIM_MIN_RATIO)}mm）。`);
+    return;
+  }
+  if (th < ch * TRIM_MIN_RATIO) {
+    showError(`可视高度 ${th}mm 偏小（画面高 ${ch}mm，可视高应 ≥ ${Math.ceil(ch * TRIM_MIN_RATIO)}mm）。`);
+    return;
+  }
+  if (tw > TRIM_MAX_W_MM) {
+    showError(`可视宽度 ${tw}mm 超出上限（最大 ${TRIM_MAX_W_MM}mm）——元素 PNG 原始像素不足，放大会模糊。`);
     return;
   }
 
@@ -347,7 +427,8 @@ function showError(msg) {
 
 @app.route("/")
 def index():
-    return PAGE_HTML, 200, {"Content-Type": "text/html; charset=utf-8"}
+    html = PAGE_HTML.replace("__TRIM_MAX_W_MM__", str(TRIM_MAX_W_MM))
+    return html, 200, {"Content-Type": "text/html; charset=utf-8"}
 
 
 @app.route("/generate", methods=["POST"])
@@ -362,6 +443,36 @@ def generate():
         th   = float(body["th"])
     except (KeyError, ValueError) as exc:
         return jsonify(ok=False, error=f"参数错误：{exc}"), 400
+
+    # 尺寸校验：四个值均 ≥ 150mm，竖版，且可视尺寸在合理范围内（80%~100% 画面尺寸）
+    MIN_MM        = 150.0
+    TRIM_MIN_RATIO = 0.80   # 真实数据下限约 88%，此处取 80% 作为宽松安全下限
+    for label, val in [("画面宽度", cw), ("画面高度", ch), ("可视宽度", tw), ("可视高度", th)]:
+        if val < MIN_MM:
+            return jsonify(ok=False, error=f"{label} {val:.0f}mm 过小，最小允许值为 {MIN_MM:.0f}mm"), 400
+    if cw >= ch:
+        return jsonify(ok=False, error=f"画面尺寸必须是竖版（高 > 宽），当前 {cw:.0f}×{ch:.0f}mm"), 400
+    if tw >= th:
+        return jsonify(ok=False, error=f"可视尺寸必须是竖版（高 > 宽），当前 {tw:.0f}×{th:.0f}mm"), 400
+    if tw >= cw:
+        return jsonify(ok=False, error=f"可视宽度（{tw:.0f}mm）必须小于画面宽度（{cw:.0f}mm）"), 400
+    if th >= ch:
+        return jsonify(ok=False, error=f"可视高度（{th:.0f}mm）必须小于画面高度（{ch:.0f}mm）"), 400
+    if tw < cw * TRIM_MIN_RATIO:
+        return jsonify(ok=False, error=(
+            f"可视宽度 {tw:.0f}mm 偏小（画面宽 {cw:.0f}mm，"
+            f"可视宽应 ≥ {cw * TRIM_MIN_RATIO:.0f}mm，即画面宽的 {TRIM_MIN_RATIO*100:.0f}%）"
+        )), 400
+    if th < ch * TRIM_MIN_RATIO:
+        return jsonify(ok=False, error=(
+            f"可视高度 {th:.0f}mm 偏小（画面高 {ch:.0f}mm，"
+            f"可视高应 ≥ {ch * TRIM_MIN_RATIO:.0f}mm，即画面高的 {TRIM_MIN_RATIO*100:.0f}%）"
+        )), 400
+    if tw > TRIM_MAX_W_MM:
+        return jsonify(ok=False, error=(
+            f"可视宽度 {tw:.0f}mm 超出上限 {TRIM_MAX_W_MM}mm——"
+            f"元素 PNG 原始像素不足（放大会模糊）。请缩小成品框宽度。"
+        )), 400
 
     spec = CitySpec(
         city=city,

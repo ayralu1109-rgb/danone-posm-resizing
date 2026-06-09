@@ -361,6 +361,22 @@ def process_city(
     """
     logging.info("[%s] Processing %s ...", spec.city, spec.slug)
 
+    # --- Guard: reject canvases below minimum short-edge threshold ---
+    # Business constraint: real POSM sizes have a short edge of at least 150mm.
+    # Below this threshold the layout proportions break down (title/stamp overlap
+    # and other artefacts cannot be gracefully recovered).
+    MIN_MM = 150.0
+    for label, val in [
+        ("画面宽度", spec.canvas_w_mm), ("画面高度", spec.canvas_h_mm),
+        ("可视宽度", spec.trim_w_mm),   ("可视高度", spec.trim_h_mm),
+    ]:
+        if val < MIN_MM:
+            raise ValueError(f"{label} {val:.0f}mm 过小，最小允许值为 {MIN_MM:.0f}mm。")
+    if spec.trim_w_mm >= spec.trim_h_mm:
+        raise ValueError(
+            f"可视尺寸必须是竖版（高 > 宽），当前 {spec.trim_w_mm:.0f}×{spec.trim_h_mm:.0f}mm。"
+        )
+
     # --- PoC guard: reject landscape / square canvases ---
     # The current layout rules (element_layout.py) were calibrated exclusively
     # on portrait training images (W/H 0.59–0.86).  A landscape canvas causes
