@@ -1,0 +1,4425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>内容平台 · 达能</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root {
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --primary-bg: #eff6ff;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --radius: 10px;
+            --radius-sm: 6px;
+            --shadow-md: 0 2px 12px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.10);
+            --transition: 0.2s ease;
+        }
+        html, body {
+            height: 100%;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+            background: var(--gray-100);
+            color: var(--gray-800);
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            overflow: hidden;
+        }
+        .app-container {
+            max-width: 1440px;
+            width: 100%;
+            height: calc(100vh - 40px);
+            background: #ffffff;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 28px;
+            border-bottom: 1px solid var(--gray-200);
+            background: #fff;
+            flex-wrap: wrap;
+            gap: 12px;
+            z-index: 100;
+            position: relative;
+        }
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 18px;
+        }
+        .brand-name {
+            font-weight: 700;
+            font-size: 18px;
+            letter-spacing: -0.3px;
+            color: var(--gray-800);
+        }
+        .brand-name span {
+            color: var(--primary);
+        }
+        .badge-version {
+            background: var(--primary-bg);
+            color: var(--primary);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 12px;
+            border-radius: 30px;
+            border: 1px solid rgba(37, 99, 235, 0.2);
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .user-info {
+            font-size: 14px;
+            color: var(--gray-600);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .user-info i {
+            color: var(--primary);
+        }
+        .header-actions .btn {
+            white-space: nowrap;
+        }
+        .main-layout {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            position: relative;
+        }
+        .sidebar {
+            width: 220px;
+            background: #ffffff;
+            border-right: 1px solid var(--gray-200);
+            padding: 16px 0;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+            overflow: hidden;
+            transition: width 0.22s ease;
+        }
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 8px 4px 0;
+            min-height: 32px;
+        }
+        .sidebar-toggle {
+            width: 28px;
+            height: 28px;
+            margin-right: 12px;
+            border: 1px solid var(--gray-200);
+            background: #fff;
+            border-radius: var(--radius-sm);
+            color: var(--gray-500);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: var(--transition);
+        }
+        .sidebar-toggle:hover {
+            background: var(--primary-bg);
+            border-color: rgba(37, 99, 235, 0.25);
+            color: var(--primary);
+        }
+        .sidebar-toggle i {
+            font-size: 12px;
+            transition: transform 0.22s ease;
+        }
+        .sidebar.collapsed {
+            width: 64px;
+        }
+        .sidebar.collapsed .sidebar-header {
+            justify-content: center;
+            padding: 0 0 8px;
+        }
+        .sidebar.collapsed .sidebar-toggle {
+            margin-right: 0;
+        }
+        .sidebar.collapsed .sidebar-toggle i {
+            transform: rotate(180deg);
+        }
+        .sidebar.collapsed .nav-section-title,
+        .sidebar.collapsed .nav-label,
+        .sidebar.collapsed .badge-count,
+        .sidebar.collapsed .nav-footer {
+            display: none;
+        }
+        .sidebar.collapsed .nav-item {
+            justify-content: center;
+            padding: 10px 0;
+            gap: 0;
+            width: calc(100% - 12px);
+            margin: 2px 6px;
+        }
+        .sidebar.collapsed .nav-divider {
+            margin: 8px 12px;
+        }
+        .sidebar .nav-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--gray-400);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 8px 20px 4px;
+        }
+        .sidebar .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 20px;
+            margin: 2px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gray-700);
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            border: none;
+            background: none;
+            width: calc(100% - 16px);
+            text-align: left;
+        }
+        .sidebar .nav-item i {
+            width: 20px;
+            font-size: 16px;
+            text-align: center;
+            color: var(--gray-400);
+        }
+        .sidebar .nav-item:hover {
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+        .sidebar .nav-item:hover i {
+            color: var(--primary);
+        }
+        .sidebar .nav-item.active {
+            background: var(--primary-bg);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .sidebar .nav-item.active i {
+            color: var(--primary);
+        }
+        .sidebar .nav-divider {
+            height: 1px;
+            background: var(--gray-200);
+            margin: 8px 16px;
+        }
+        .sidebar .nav-footer {
+            margin-top: auto;
+            padding: 16px 20px;
+            font-size: 12px;
+            color: var(--gray-400);
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+        }
+        .sidebar .nav-footer .more {
+            color: var(--gray-500);
+            cursor: pointer;
+        }
+        .sidebar .nav-footer .more:hover {
+            color: var(--primary);
+        }
+        .nav-item .badge-count {
+            margin-left: auto;
+            background: var(--gray-200);
+            color: var(--gray-600);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 0 8px;
+            border-radius: 30px;
+            min-width: 20px;
+            text-align: center;
+        }
+        .nav-item.active .badge-count {
+            background: var(--primary-bg);
+            color: var(--primary);
+        }
+        .content-area {
+            flex: 1;
+            min-width: 0;
+            min-height: 0;
+            background: #fff;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+        }
+        .list-view {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+            height: 100%;
+            padding: 20px 28px 28px;
+            background: #fff;
+        }
+        .list-view .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .list-view .list-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .list-view .list-header h2 i {
+            color: var(--primary);
+        }
+        .list-view .list-header .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .list-filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px 16px;
+            padding: 8px 0 16px;
+            border-bottom: 1px solid var(--gray-200);
+            margin-bottom: 16px;
+        }
+        .list-filter-bar .filter-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .list-filter-bar .tag {
+            padding: 3px 14px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 500;
+            background: #fff;
+            border: 1px solid var(--gray-300);
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: var(--transition);
+            user-select: none;
+        }
+        .list-filter-bar .tag:hover {
+            border-color: var(--primary-light);
+        }
+        .list-filter-bar .tag.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+        }
+        .list-filter-bar .search-box {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            padding: 2px 12px;
+            transition: var(--transition);
+        }
+        .list-filter-bar .search-box:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+        }
+        .list-filter-bar .search-box input {
+            border: none;
+            background: transparent;
+            padding: 6px 0;
+            font-size: 13px;
+            outline: none;
+            width: 140px;
+            color: var(--gray-700);
+        }
+        .list-filter-bar .search-box i {
+            color: var(--gray-400);
+            font-size: 14px;
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 4px 2px 8px;
+            align-content: start;
+        }
+        .card-grid .empty-state {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: var(--gray-400);
+        }
+        .card-grid .empty-state i {
+            font-size: 48px;
+            opacity: 0.3;
+            margin-bottom: 12px;
+        }
+        .card-grid .empty-state p {
+            font-size: 15px;
+        }
+        .content-card {
+            background: #fff;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: var(--transition);
+            box-shadow: var(--shadow-md);
+            display: flex;
+            flex-direction: column;
+            max-width: 100%;
+            height: 300px;
+        }
+        .content-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+            border-color: var(--gray-300);
+        }
+        .content-card .card-img {
+            height: 120px;
+            flex-shrink: 0;
+            background-size: cover;
+            background-position: center;
+            background-color: var(--gray-200);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 28px;
+        }
+        .content-card .card-img .status-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 10px;
+            border-radius: 30px;
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            backdrop-filter: blur(4px);
+        }
+        .content-card .card-img .status-badge.in {
+            background: #10b981;
+        }
+        .content-card .card-img .status-badge.out {
+            background: #f59e0b;
+        }
+        .content-card .card-body {
+            padding: 10px 14px 6px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 0;
+        }
+        .content-card .card-body .card-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--gray-800);
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .content-card .card-body .card-desc {
+            font-size: 12px;
+            color: var(--gray-500);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 4px;
+            flex-shrink: 0;
+        }
+        .content-card .card-body .card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 10px;
+            font-size: 10px;
+            color: var(--gray-400);
+            border-top: 1px solid var(--gray-100);
+            padding-top: 6px;
+            margin-top: auto;
+            flex-shrink: 0;
+        }
+        .content-card .card-body .card-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .content-card .card-body .card-meta .tag-pill {
+            background: var(--gray-100);
+            padding: 0 6px;
+            border-radius: 20px;
+            font-size: 10px;
+            color: var(--gray-600);
+        }
+        .content-card .card-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px 8px;
+            border-top: 1px solid var(--gray-100);
+            background: var(--gray-50);
+            flex-wrap: wrap;
+            flex-shrink: 0;
+            min-height: 44px;
+        }
+        .content-card .card-actions .btn-icon-sm {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            color: var(--gray-500);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+        }
+        .content-card .card-actions .btn-icon-sm:hover {
+            background: var(--gray-200);
+            color: var(--gray-700);
+        }
+        .content-card .card-actions .btn-icon-sm.favorited {
+            color: #f59e0b;
+        }
+        .content-card .card-actions .btn-icon-sm.favorited:hover {
+            color: #d97706;
+        }
+        .content-card .card-actions .btn-icon-sm.edit:hover {
+            color: var(--primary);
+        }
+        .content-card .card-actions .btn-icon-sm.preview:hover {
+            color: var(--primary);
+        }
+        .content-card .card-actions .spacer {
+            flex: 1;
+        }
+        .content-card .card-actions .btn-save-library {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 12px;
+            border-radius: 20px;
+            border: none;
+            background: var(--primary);
+            color: #fff;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+        .content-card .card-actions .btn-save-library:hover {
+            background: var(--primary-dark);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+        .content-card .card-actions .btn-save-library:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .content-card .card-actions .status-text {
+            font-size: 10px;
+            color: var(--gray-400);
+        }
+        .content-card .card-actions .status-text.in {
+            color: #10b981;
+        }
+        .generate-view {
+            display: none;
+            flex: 1;
+            min-height: 0;
+            height: 100%;
+            background: #fff;
+            grid-template-columns: 1fr 380px;
+            grid-template-rows: auto minmax(0, 1fr);
+            gap: 0;
+        }
+        .generate-view.active {
+            display: grid;
+        }
+        .filter-bar {
+            grid-column: 1 / -1;
+            background: var(--gray-50);
+            border-bottom: 1px solid var(--gray-200);
+            padding: 10px 28px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px 20px;
+        }
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+        .filter-group label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+        .filter-group select {
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--gray-300);
+            background: #fff;
+            font-size: 13px;
+            font-weight: 500;
+            outline: none;
+            cursor: pointer;
+            min-width: 108px;
+            transition: var(--transition);
+        }
+        .filter-group select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+        .tag-group {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+        .tag {
+            padding: 3px 10px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 500;
+            background: #fff;
+            border: 1px solid var(--gray-300);
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: var(--transition);
+            user-select: none;
+        }
+        .tag:hover {
+            border-color: var(--primary-light);
+        }
+        .tag.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+        }
+        .filter-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+            align-items: center;
+        }
+        .filter-actions .btn-icon {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--gray-300);
+            background: #fff;
+            color: var(--gray-500);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        .filter-actions .btn-icon:hover {
+            background: var(--gray-200);
+            color: var(--gray-700);
+            border-color: var(--gray-400);
+        }
+        .left-panel {
+            padding: 24px 28px 32px;
+            border-right: 1px solid var(--gray-200);
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            overflow-y: auto;
+            min-height: 0;
+            max-height: 100%;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .section-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--gray-700);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-title i {
+            color: var(--primary);
+            font-size: 15px;
+        }
+        .template-scroll {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            min-height: 70px;
+        }
+        .template-card {
+            flex: 0 0 110px;
+            background: #fff;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            padding: 8px 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+        .template-card:hover {
+            border-color: var(--gray-400);
+            transform: translateY(-2px);
+        }
+        .template-card.active {
+            border-color: var(--primary);
+            background: var(--primary-bg);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+        }
+        .template-card .preview-box {
+            height: 44px;
+            border-radius: 4px;
+            background: var(--gray-100);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 4px;
+            overflow: hidden;
+        }
+        .template-card .preview-box .line {
+            width: 80%;
+            height: 4px;
+            background: var(--gray-300);
+            border-radius: 4px;
+            margin: 2px 0;
+        }
+        .template-card .preview-box .line.primary {
+            background: var(--primary);
+            width: 60%;
+        }
+        .template-card .preview-box .line.dark {
+            background: var(--gray-700);
+            width: 70%;
+        }
+        .template-card .tpl-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+        .template-card .check-badge {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 16px;
+            height: 16px;
+            background: var(--primary);
+            color: #fff;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+        }
+        .template-card.active .check-badge {
+            display: flex;
+        }
+        .template-empty {
+            color: var(--gray-400);
+            font-size: 14px;
+            padding: 16px 0;
+            text-align: center;
+            width: 100%;
+        }
+        .copy-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .field label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .field input,
+        .field textarea {
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--gray-200);
+            font-size: 14px;
+            font-family: inherit;
+            transition: var(--transition);
+            background: #fff;
+            width: 100%;
+            color: var(--gray-800);
+            resize: vertical;
+        }
+        .field input:focus,
+        .field textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+        }
+        .field textarea {
+            min-height: 56px;
+            line-height: 1.6;
+        }
+        .copy-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .copy-history {
+            position: relative;
+            display: none;
+        }
+        .copy-history.visible {
+            display: inline-flex;
+        }
+        .copy-history-menu {
+            display: none;
+            position: absolute;
+            left: 0;
+            bottom: calc(100% + 6px);
+            min-width: 260px;
+            max-width: 320px;
+            background: #fff;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            padding: 6px;
+            z-index: 20;
+        }
+        .copy-history.open .copy-history-menu,
+        .copy-history:hover .copy-history-menu {
+            display: block;
+        }
+        .copy-history-item {
+            width: 100%;
+            text-align: left;
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-sm);
+            padding: 8px 10px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .copy-history-item:hover {
+            background: var(--gray-50);
+        }
+        .copy-history-item.active {
+            background: var(--primary-bg);
+        }
+        .copy-history-item .h-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--gray-700);
+        }
+        .copy-history-item.active .h-top {
+            color: var(--primary);
+        }
+        .copy-history-item .h-badge {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--primary);
+            background: #fff;
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            border-radius: 20px;
+            padding: 1px 8px;
+            white-space: nowrap;
+        }
+        .copy-history-item .h-title,
+        .copy-history-item .h-body {
+            font-size: 12px;
+            color: var(--gray-500);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 500;
+        }
+        .copy-history-item .h-title {
+            color: var(--gray-700);
+        }
+        .image-area {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .image-preview-grid {
+            display: flex;
+            gap: 10px;
+            flex-wrap: nowrap;
+            align-items: center;
+            min-height: 76px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+        .section-hint {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--gray-400);
+        }
+        .image-option {
+            width: 72px;
+            height: 72px;
+            flex: 0 0 72px;
+            border-radius: var(--radius-sm);
+            border: 2px solid var(--gray-200);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            color: #fff;
+            font-weight: 500;
+            font-size: 11px;
+            gap: 2px;
+            position: relative;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+            background-color: var(--gray-200);
+        }
+        .image-option:hover {
+            transform: scale(1.05);
+        }
+        .image-option.selected {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+        .image-option .check-badge {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: var(--primary);
+            color: #fff;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+        .image-option.selected .check-badge {
+            display: flex;
+        }
+        .image-option i {
+            font-size: 24px;
+            opacity: 0.8;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+        }
+        .image-option .img-label {
+            font-size: 10px;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0 6px;
+            border-radius: 10px;
+        }
+        .image-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .right-panel {
+            padding: 24px 24px 32px;
+            background: var(--gray-50);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            min-height: 0;
+            max-height: 100%;
+        }
+        .right-panel .section-title {
+            margin-bottom: 10px;
+        }
+        .preview-touch-switcher {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .preview-touch-switcher .touch-tab {
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 500;
+            background: #fff;
+            border: 1px solid var(--gray-300);
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .preview-touch-switcher .touch-tab.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+        .preview-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            max-height: 480px;
+            padding-right: 4px;
+        }
+        /* ===== 统一预览卡片基类 ===== */
+        .preview-card {
+            background: #fff;
+            border-radius: 10px;
+            border: 1px solid #e5e5e5;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            transition: all 0.3s ease;
+        }
+        .preview-card .card-img {
+            height: 140px;
+            background-size: cover;
+            background-position: center;
+            background-color: #e8e8e8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 32px;
+            position: relative;
+        }
+        .preview-card .card-img i {
+            opacity: 0.8;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+        }
+        .preview-card .card-img .img-label-badge {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: #fff;
+        }
+        .preview-card .card-body {
+            padding: 16px 20px;
+        }
+        .preview-card .card-body .card-title {
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .preview-card .card-body .card-title .badge-node {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--primary);
+            background: var(--primary-bg);
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        .preview-card .card-body .card-text {
+            line-height: 1.6;
+        }
+        .preview-card .card-body .card-meta {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            border-top: 1px solid var(--gray-100);
+            padding-top: 10px;
+        }
+        .preview-card .card-body .card-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ===== 企微 ===== */
+        .preview-card.wecom .wecom-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px 8px;
+            gap: 10px;
+        }
+        .preview-card.wecom .wecom-header .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2b7b3a, #4caf50);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .preview-card.wecom .wecom-header .sender {
+            font-weight: 600;
+        }
+        .preview-card.wecom .wecom-header .time {
+            margin-left: auto;
+            font-size: 11px;
+            color: #999;
+        }
+        .preview-card.wecom .wecom-body {
+            padding: 0 16px 12px;
+        }
+        .preview-card.wecom .wecom-body .text-content {
+            margin-bottom: 10px;
+        }
+        .preview-card.wecom .wecom-body .wecom-card {
+            background: #f7f7f7;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e8e8e8;
+        }
+        .preview-card.wecom .wecom-body .wecom-card .card-img {
+            height: 120px;
+        }
+        .preview-card.wecom .wecom-body .wecom-card .card-info {
+            padding: 10px 14px;
+        }
+        .preview-card.wecom .wecom-body .wecom-card .card-info .card-desc {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+        .preview-card.wecom .wecom-body .wecom-card .card-info .card-source {
+            font-size: 11px;
+            color: #999;
+            margin-top: 6px;
+        }
+        .preview-card.wecom .wecom-footer {
+            padding: 8px 16px 12px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: #999;
+        }
+
+        /* ===== 朋友圈 ===== */
+        .preview-card.moments {
+            padding: 14px 16px 12px;
+        }
+        .preview-card.moments .moments-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .preview-card.moments .moments-header .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f5a623, #f7c948);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .preview-card.moments .moments-header .name {
+            font-weight: 600;
+        }
+        .preview-card.moments .moments-header .time {
+            font-size: 11px;
+            color: #999;
+            margin-left: auto;
+        }
+        .preview-card.moments .moments-text {
+            margin-bottom: 10px;
+        }
+        .preview-card.moments .moments-images {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .preview-card.moments .moments-images .m-img {
+            aspect-ratio: 1;
+            background-size: cover;
+            background-position: center;
+            background-color: #e8e8e8;
+        }
+        .preview-card.moments .moments-images .m-img.single {
+            aspect-ratio: 16/9;
+            grid-column: 1 / -1;
+        }
+        .preview-card.moments .moments-actions {
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+            color: #999;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 10px;
+        }
+
+        /* ===== 小程序 ===== */
+        .preview-card.miniapp .miniapp-img {
+            height: 160px;
+            background-size: cover;
+            background-position: center;
+            background-color: #e8e8e8;
+            position: relative;
+        }
+        .preview-card.miniapp .miniapp-img .miniapp-tag {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 10px;
+            border-radius: 4px;
+        }
+        .preview-card.miniapp .miniapp-body {
+            padding: 14px 16px 16px;
+        }
+        .preview-card.miniapp .miniapp-body .miniapp-title {
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .preview-card.miniapp .miniapp-body .miniapp-desc {
+            color: #666;
+            line-height: 1.5;
+        }
+        .preview-card.miniapp .miniapp-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px 14px;
+            border-top: 1px solid #f0f0f0;
+        }
+        .preview-card.miniapp .miniapp-footer .miniapp-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #666;
+        }
+        .preview-card.miniapp .miniapp-footer .miniapp-brand .brand-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 12px;
+        }
+        .preview-card.miniapp .miniapp-footer .miniapp-btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: default;
+        }
+
+        /* ===== 公众号 - 长图文 ===== */
+        .preview-card.official-long {
+            border-radius: 10px;
+            border: 1px solid #e5e5e5;
+            overflow: hidden;
+            background: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+        .preview-card.official-long .official-cover {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            background-color: #e0e0e0;
+            display: flex;
+            align-items: flex-end;
+            padding: 20px 20px 16px;
+            color: #fff;
+            text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+        .preview-card.official-long .official-cover .cover-tag {
+            font-size: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2px 12px;
+            border-radius: 4px;
+            display: inline-block;
+            backdrop-filter: blur(4px);
+        }
+        .preview-card.official-long .official-cover h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 8px 0 4px;
+            line-height: 1.3;
+        }
+        .preview-card.official-long .official-cover .cover-sub {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .preview-card.official-long .official-body {
+            padding: 20px 20px 10px;
+            background: #fff;
+        }
+        .preview-card.official-long .official-body .article-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #999;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+        .preview-card.official-long .official-body .article-content {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #333;
+        }
+        .preview-card.official-long .official-body .article-content p {
+            margin-bottom: 16px;
+        }
+        .preview-card.official-long .official-body .article-content .inline-img {
+            width: 100%;
+            border-radius: 6px;
+            margin: 12px 0 16px;
+            background-color: #e8e8e8;
+            background-size: cover;
+            background-position: center;
+            height: 160px;
+        }
+        .preview-card.official-long .official-body .article-content .blockquote {
+            border-left: 4px solid var(--primary);
+            padding: 8px 16px;
+            background: #f8faff;
+            margin: 16px 0;
+            color: #555;
+            font-style: italic;
+        }
+        .preview-card.official-long .official-body .article-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #eee;
+            padding: 14px 0 6px;
+            font-size: 14px;
+            color: #999;
+            margin-top: 8px;
+        }
+        .preview-card.official-long .official-body .article-footer .read-more {
+            color: var(--primary);
+            font-weight: 500;
+            cursor: default;
+        }
+        .preview-card.official-long .official-body .article-footer .actions {
+            display: flex;
+            gap: 18px;
+        }
+        .preview-card.official-long .official-body .article-footer .actions span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ===== 私域群 ===== */
+        .preview-card.group .group-header {
+            display: flex;
+            align-items: center;
+            padding: 10px 16px 6px;
+            gap: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .preview-card.group .group-header .group-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+        .preview-card.group .group-header .group-name {
+            font-weight: 600;
+            font-size: 13px;
+            color: #333;
+        }
+        .preview-card.group .group-header .group-member {
+            margin-left: auto;
+            font-size: 11px;
+            color: #999;
+        }
+        .preview-card.group .group-sender {
+            padding: 6px 16px 2px;
+            font-size: 12px;
+            color: #999;
+        }
+        .preview-card.group .group-text {
+            padding: 0 16px 8px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+        }
+        .preview-card.group .group-card {
+            margin: 0 16px 10px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e8e8e8;
+            background: #fafafa;
+        }
+        .preview-card.group .group-card .group-card-img {
+            height: 100px;
+            background-size: cover;
+            background-position: center;
+            background-color: #e8e8e8;
+        }
+        .preview-card.group .group-card .group-card-info {
+            padding: 8px 12px;
+        }
+        .preview-card.group .group-card .group-card-info .group-card-title {
+            font-weight: 600;
+            font-size: 13px;
+            color: #333;
+        }
+        .preview-card.group .group-card .group-card-info .group-card-desc {
+            font-size: 12px;
+            color: #888;
+            margin-top: 2px;
+        }
+        .preview-card.group .group-footer {
+            padding: 6px 16px 10px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            gap: 20px;
+            font-size: 12px;
+            color: #999;
+        }
+
+        /* ===== 通用 ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            background: #fff;
+            color: var(--gray-700);
+            border: 1px solid var(--gray-300);
+        }
+        .btn:hover:not(:disabled) {
+            background: var(--gray-100);
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+        }
+        .btn-outline-primary {
+            background: transparent;
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+        .btn-outline-primary:hover:not(:disabled) {
+            background: var(--primary-bg);
+        }
+        .btn-success {
+            background: #10b981;
+            color: #fff;
+            border-color: #10b981;
+        }
+        .btn-success:hover:not(:disabled) {
+            background: #059669;
+        }
+        .btn-sm {
+            padding: 4px 12px;
+            font-size: 12px;
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: #fff;
+            border-color: #ef4444;
+        }
+        .btn-danger:hover:not(:disabled) {
+            background: #dc2626;
+            border-color: #dc2626;
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        .btn-outline-primary .spinner {
+            border-color: rgba(37, 99, 235, 0.2);
+            border-top-color: var(--primary);
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .toast-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 4000;
+        }
+        .toast {
+            padding: 10px 20px;
+            background: var(--gray-800);
+            color: #fff;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-lg);
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+        }
+        .toast.success {
+            background: #10b981;
+        }
+        .toast.warning {
+            background: #f59e0b;
+        }
+        .toast.info {
+            background: #3b82f6;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(6px);
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .modal-overlay.open {
+            display: flex;
+        }
+        .modal-box {
+            background: #fff;
+            border-radius: var(--radius);
+            max-width: 860px;
+            width: 94%;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+        .modal-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .modal-header h3 i {
+            color: var(--primary);
+            margin-right: 8px;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--gray-400);
+            transition: var(--transition);
+            line-height: 1;
+        }
+        .modal-close:hover {
+            color: var(--gray-800);
+        }
+        .modal-body {
+            padding: 20px 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .modal-footer {
+            padding: 12px 24px;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-shrink: 0;
+            background: var(--gray-50);
+        }
+        .preview-modal .modal-box {
+            max-width: 600px;
+            width: 94%;
+        }
+        .preview-modal .modal-body {
+            padding: 16px 20px 20px;
+        }
+        @media (max-width: 1024px) {
+            .generate-view {
+                grid-template-columns: 1fr 300px;
+            }
+            .left-panel {
+                padding: 24px 20px 32px;
+            }
+            .right-panel {
+                padding: 24px 20px 32px;
+            }
+            .sidebar {
+                width: 180px;
+            }
+        }
+        @media (max-width: 820px) {
+            body {
+                padding: 10px;
+                overflow: auto;
+                align-items: flex-start;
+            }
+            .app-container {
+                height: auto;
+                min-height: calc(100vh - 20px);
+            }
+            .main-layout {
+                flex-direction: column;
+                min-height: 0;
+            }
+            .sidebar,
+            .sidebar.collapsed {
+                width: 100%;
+                flex-direction: row;
+                border-right: none;
+                border-bottom: 1px solid var(--gray-200);
+                padding: 8px 16px;
+                gap: 4px;
+                overflow-x: auto;
+                background: var(--gray-50);
+            }
+            .sidebar-header,
+            .sidebar-toggle {
+                display: none;
+            }
+            .sidebar.collapsed .nav-label {
+                display: inline;
+            }
+            .sidebar.collapsed .nav-item {
+                justify-content: flex-start;
+                padding: 8px 14px;
+                width: auto;
+                margin: 0;
+            }
+            .sidebar .nav-item {
+                padding: 8px 14px;
+                margin: 0;
+                white-space: nowrap;
+                font-size: 13px;
+            }
+            .sidebar .nav-item .badge-count {
+                display: none;
+            }
+            .sidebar .nav-section-title,
+            .sidebar .nav-divider,
+            .sidebar .nav-footer {
+                display: none;
+            }
+            .generate-view {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto;
+            }
+            .left-panel {
+                border-right: none;
+                border-bottom: 1px solid var(--gray-200);
+                max-height: none;
+                padding: 12px 14px 16px;
+            }
+            .right-panel {
+                min-height: 300px;
+                max-height: none;
+                padding: 12px 14px 16px;
+            }
+            .filter-bar {
+                padding: 8px 16px;
+                gap: 6px;
+            }
+            .filter-actions {
+                margin-left: 0;
+                width: 100%;
+                justify-content: flex-end;
+            }
+            .template-card {
+                flex: 0 0 100px;
+            }
+            .modal-box {
+                width: 98%;
+                max-height: 95vh;
+            }
+            .preview-container {
+                max-height: 400px;
+            }
+            .list-view {
+                padding: 16px 16px 20px;
+            }
+            .card-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+            .list-filter-bar .search-box input {
+                width: 100px;
+            }
+        }
+        @media (max-width: 480px) {
+            .app-header {
+                padding: 10px 16px;
+            }
+            .list-view {
+                padding: 12px 12px 16px;
+            }
+            .list-view .list-header h2 {
+                font-size: 17px;
+            }
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+            .left-panel {
+                padding: 12px 14px 16px;
+            }
+            .right-panel {
+                padding: 12px 14px 16px;
+            }
+            .template-card {
+                flex: 0 0 80px;
+                padding: 6px 8px;
+            }
+            .template-card .preview-box {
+                height: 32px;
+            }
+            .template-card .tpl-name {
+                font-size: 10px;
+            }
+            .image-option {
+                width: 56px;
+                height: 56px;
+                font-size: 10px;
+            }
+            .image-option i {
+                font-size: 18px;
+            }
+            .modal-header {
+                padding: 10px 14px;
+            }
+            .modal-body {
+                padding: 12px 14px;
+            }
+            .preview-container {
+                max-height: 320px;
+            }
+            .list-filter-bar .search-box input {
+                width: 80px;
+            }
+        }
+        .saving-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(4px);
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .saving-overlay.open {
+            display: flex;
+        }
+        .saving-overlay .spinner-big {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        .saving-overlay .saving-text {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+        .confirm-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 5000;
+            align-items: center;
+            justify-content: center;
+        }
+        .confirm-overlay.open {
+            display: flex;
+        }
+        .confirm-box {
+            background: #fff;
+            border-radius: var(--radius);
+            max-width: 420px;
+            width: 92%;
+            padding: 28px 32px 24px;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+        }
+        .confirm-box .icon {
+            font-size: 40px;
+            color: #f59e0b;
+            margin-bottom: 12px;
+        }
+        .confirm-box h4 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 6px;
+        }
+        .confirm-box p {
+            font-size: 14px;
+            color: var(--gray-500);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .confirm-box .actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .confirm-box .actions .btn {
+            min-width: 80px;
+            justify-content: center;
+        }
+        .asset-modal .modal-box {
+            max-width: 1180px;
+            width: 96%;
+            height: min(860px, 90vh);
+            max-height: 90vh;
+        }
+        .asset-modal .modal-header {
+            gap: 16px;
+        }
+        .asset-modal .modal-header h3 {
+            flex-shrink: 0;
+        }
+        .asset-search {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: 20px;
+            padding: 6px 12px;
+            min-width: 220px;
+        }
+        .asset-search i {
+            color: var(--gray-400);
+            font-size: 13px;
+        }
+        .asset-search input {
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 13px;
+            width: 100%;
+        }
+        .asset-filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 24px;
+            border-bottom: 1px solid var(--gray-100);
+        }
+        .asset-filter-row select {
+            border: none;
+            background: transparent;
+            font-size: 12px;
+            color: var(--gray-600);
+            cursor: pointer;
+            outline: none;
+            max-width: 140px;
+        }
+        .asset-filter-row select.has-value {
+            color: #e11d48;
+            font-weight: 600;
+        }
+        .asset-link-btn {
+            border: none;
+            background: none;
+            color: var(--gray-500);
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .asset-link-btn:hover {
+            color: var(--primary);
+        }
+        .asset-meta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 24px 0;
+            font-size: 13px;
+            color: var(--gray-600);
+        }
+        .asset-sort-btn {
+            border: none;
+            background: none;
+            color: var(--gray-600);
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .asset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 16px;
+        }
+        .asset-item {
+            background: #fff;
+            border: none;
+            overflow: hidden;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+        .asset-item:hover .thumb {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+        .asset-item .thumb {
+            height: 120px;
+            border-radius: 6px;
+            background-size: cover;
+            background-position: center;
+            background-color: var(--gray-200);
+            position: relative;
+        }
+        .asset-item .radio {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            background: rgba(255, 255, 255, 0.35);
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+        }
+        .asset-item.selected .radio {
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px #fff;
+        }
+        .asset-item .eye {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.35);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+        }
+        .asset-item .info {
+            padding: 8px 2px 0;
+        }
+        .asset-item .info .name {
+            font-weight: 500;
+            font-size: 12px;
+            color: var(--gray-800);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .asset-item .info .meta {
+            display: flex;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--gray-400);
+            margin-top: 2px;
+        }
+        .asset-footer {
+            justify-content: flex-start;
+            align-items: center;
+            background: #fff;
+        }
+        .asset-footer .spacer {
+            flex: 1;
+        }
+        .asset-selected-info {
+            font-size: 13px;
+            color: var(--gray-700);
+        }
+        .asset-files-btn {
+            border: 1px solid var(--gray-200);
+            background: #fff;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 13px;
+            color: var(--gray-700);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .asset-files-btn .badge {
+            min-width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            background: var(--gray-200);
+            color: var(--gray-600);
+            font-size: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+        }
+        #assetConfirmBtn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+        #assetPagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 14px;
+        }
+        #assetPagination button {
+            padding: 4px 12px;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-sm);
+            background: #fff;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        #assetPagination button:hover:not(:disabled) {
+            background: var(--gray-100);
+        }
+        #assetPagination button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .page-info {
+            font-size: 13px;
+            color: var(--gray-600);
+        }
+        .filter-tag {
+            display: inline-block;
+            padding: 4px 14px;
+            margin: 4px 6px 4px 0;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 500;
+            background: #fff;
+            border: 1px solid var(--gray-300);
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .filter-tag:hover {
+            border-color: var(--primary-light);
+        }
+        .filter-tag.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+        }
+        .filter-section {
+            margin-bottom: 16px;
+        }
+        .filter-section-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--gray-700);
+            margin-bottom: 6px;
+        }
+        .settings-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px 4px 14px;
+            margin: 4px 6px 4px 0;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 500;
+            background: var(--primary-bg);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .settings-tag.inactive {
+            background: #fff;
+            border-color: var(--gray-300);
+            color: var(--gray-500);
+        }
+        .settings-tag .remove-btn {
+            background: none;
+            border: none;
+            color: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 0 2px;
+            opacity: 0.6;
+        }
+        .settings-tag .remove-btn:hover {
+            opacity: 1;
+        }
+        .settings-group {
+            margin-bottom: 14px;
+        }
+        .settings-group-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray-600);
+            margin-bottom: 4px;
+        }
+        .library-modal .modal-body {
+            display: flex;
+            padding: 0;
+            overflow: hidden;
+            max-height: 70vh;
+        }
+        .library-sidebar {
+            width: 180px;
+            background: var(--gray-50);
+            padding: 16px 0;
+            border-right: 1px solid var(--gray-200);
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .library-sidebar .nav-item {
+            padding: 8px 20px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--gray-700);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+        }
+        .library-sidebar .nav-item:hover {
+            background: var(--gray-100);
+        }
+        .library-sidebar .nav-item.active {
+            background: var(--primary-bg);
+            color: var(--primary);
+        }
+        .library-sidebar .nav-divider {
+            height: 1px;
+            background: var(--gray-200);
+            margin: 6px 16px;
+        }
+        .library-sidebar .nav-footer {
+            margin-top: auto;
+            padding: 12px 20px;
+            font-size: 12px;
+            color: var(--gray-400);
+            border-top: 1px solid var(--gray-200);
+        }
+        .library-main {
+            flex: 1;
+            padding: 16px 20px;
+            overflow-y: auto;
+        }
+        .library-toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .library-toolbar input {
+            flex: 1;
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--gray-300);
+            font-size: 13px;
+            outline: none;
+        }
+        .library-toolbar input:focus {
+            border-color: var(--primary);
+        }
+        .library-toolbar .upload-btn {
+            padding: 6px 16px;
+            border-radius: var(--radius-sm);
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .library-toolbar .upload-btn:hover {
+            background: var(--primary-dark);
+        }
+        .library-tabs {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--gray-200);
+            padding-bottom: 6px;
+        }
+        .library-tabs .tab {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray-500);
+            cursor: pointer;
+            padding: 2px 0;
+            border-bottom: 2px solid transparent;
+            transition: var(--transition);
+        }
+        .library-tabs .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        .library-tabs .tab.badge::after {
+            content: "3";
+            background: var(--gray-200);
+            color: var(--gray-600);
+            font-size: 10px;
+            font-weight: 600;
+            padding: 0 8px;
+            border-radius: 30px;
+            margin-left: 4px;
+        }
+        .library-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+        .library-filters .filter-pill {
+            font-size: 11px;
+            padding: 2px 12px;
+            border-radius: 30px;
+            background: var(--gray-100);
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .library-filters .filter-pill:hover {
+            background: var(--gray-200);
+        }
+        .library-list {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 0;
+            color: var(--gray-400);
+        }
+        .library-list .empty-icon {
+            font-size: 48px;
+            opacity: 0.3;
+            margin-bottom: 8px;
+        }
+        .library-list .empty-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--gray-500);
+        }
+        .library-list .empty-sub {
+            font-size: 13px;
+            color: var(--gray-400);
+            margin-top: 2px;
+        }
+        .library-footer-actions {
+            display: flex;
+            gap: 20px;
+            padding-top: 12px;
+            border-top: 1px solid var(--gray-200);
+            font-size: 12px;
+            color: var(--gray-400);
+        }
+        .library-footer-actions span {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .library-footer-actions span:hover {
+            color: var(--gray-600);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="logo-area" onclick="goToList()">
+                <div class="logo-icon"><i class="fas fa-cube"></i></div>
+                <div class="brand-name">内容<span>平台</span></div>
+                <span class="badge-version"><i class="fas fa-robot"></i> AI v2.0</span>
+            </div>
+            <div class="header-actions">
+                <div class="user-info"><i class="fas fa-circle-user"></i> JOJO · 内容运营</div>
+                <button class="btn btn-sm btn-outline-primary" onclick="syncData()"><i class="fas fa-sync"></i> 同步</button>
+            </div>
+        </header>
+        <!-- MAIN -->
+        <div class="main-layout">
+            <!-- SIDEBAR -->
+            <nav class="sidebar" id="mainSidebar">
+                <div class="sidebar-header">
+                    <div class="nav-section-title">内容管理</div>
+                    <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="收起侧栏" aria-label="收起侧栏">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                </div>
+                <button class="nav-item active" data-view="all" onclick="switchListTab('all')" title="全部内容">
+                    <i class="fas fa-th-list"></i>
+                    <span class="nav-label">全部内容</span>
+                    <span class="badge-count" id="countAll">12</span>
+                </button>
+                <div class="nav-divider"></div>
+                <button class="nav-item" data-view="favorites" onclick="switchListTab('favorites')" title="我收藏的">
+                    <i class="fas fa-star"></i>
+                    <span class="nav-label">我收藏的</span>
+                    <span class="badge-count" id="countFavorites">2</span>
+                </button>
+                <button class="nav-item" data-view="created" onclick="switchListTab('created')" title="我创建的">
+                    <i class="fas fa-user"></i>
+                    <span class="nav-label">我创建的</span>
+                    <span class="badge-count" id="countCreated">5</span>
+                </button>
+                <div class="nav-divider"></div>
+                <div class="nav-footer">
+                    <span><i class="fas fa-database"></i> 达能</span>
+                    <span class="more" onclick="showToast('更多功能开发中', 'info')">更多 <i class="fas fa-chevron-right"></i></span>
+                </div>
+            </nav>
+            <!-- CONTENT AREA -->
+            <div class="content-area">
+                <!-- ===== LIST VIEW ===== -->
+                <div class="list-view" id="listView">
+                    <div class="list-header">
+                        <h2><i class="fas fa-cubes"></i> <span id="listTitle">全部内容</span></h2>
+                        <div class="header-actions">
+                            <button class="btn btn-primary" onclick="openGenerateView()">
+                                <i class="fas fa-wand-magic-sparkles"></i> 制作内容
+                            </button>
+                        </div>
+                    </div>
+                    <div class="list-filter-bar">
+                        <span class="filter-label">筛选</span>
+                        <span class="tag active" data-filter="all" onclick="setListFilter('all', this)">全部</span>
+                        <span class="tag" data-filter="wecom" onclick="setListFilter('wecom', this)">企微</span>
+                        <span class="tag" data-filter="moments" onclick="setListFilter('moments', this)">朋友圈</span>
+                        <span class="tag" data-filter="miniapp" onclick="setListFilter('miniapp', this)">小程序</span>
+                        <span class="tag" data-filter="official" onclick="setListFilter('official', this)">公众号</span>
+                        <span class="tag" data-filter="group" onclick="setListFilter('group', this)">私域群</span>
+                        <!-- 状态筛选 -->
+                        <span class="tag active" data-status="all" onclick="setStatusFilter('all', this)">全部状态</span>
+                        <span class="tag" data-status="in" onclick="setStatusFilter('in', this)">已入库</span>
+                        <span class="tag" data-status="out" onclick="setStatusFilter('out', this)">未入库</span>
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="搜索内容..." id="listSearch" oninput="filterList()" />
+                        </div>
+                    </div>
+                    <div class="card-grid" id="cardGrid"></div>
+                </div>
+                <!-- ===== GENERATE VIEW ===== -->
+                <div class="generate-view" id="generateView">
+                    <!-- FILTER BAR -->
+                    <div class="filter-bar">
+                        <div class="filter-group">
+                            <label>品牌</label>
+                            <select id="brandSelect" onchange="onFilterChange()">
+                                <option value="">请选择</option>
+                                <option value="aptamil">爱他美</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>产品线</label>
+                            <select id="productSelect" onchange="onFilterChange()">
+                                <option value="">请选择</option>
+                                <option value="zhuoao">ZHUOAO</option>
+                                <option value="goat">GOAT</option>
+                                <option value="zhuozhen">ZHUOZHEN</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>传播渠道</label>
+                            <select id="touchSelect" onchange="onFilterChange()">
+                                <option value="">请选择</option>
+                                <option value="wecom">企微</option>
+                                <option value="moments">朋友圈</option>
+                                <option value="group">私域群</option>
+                                <option value="miniapp">小程序</option>
+                                <option value="official">公众号</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>营销节点</label>
+                            <select id="nodeSelect" onchange="onFilterChange()">
+                                <option value="">请选择</option>
+                                <option value="midautumn">中秋</option>
+                                <option value="cny">CNY</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>目标人群</label>
+                            <select id="audSelect" onchange="onFilterChange()">
+                                <option value="">请选择</option>
+                                <option value="0-6">0-6月</option>
+                                <option value="6-12">6-12月</option>
+                            </select>
+                        </div>
+                        <div class="filter-actions">
+                            <button class="btn btn-primary" id="generateBtn" onclick="handleGenerate()">
+                                <i class="fas fa-wand-magic-sparkles"></i> 生成内容
+                            </button>
+                        </div>
+                    </div>
+                    <!-- LEFT -->
+                    <div class="left-panel">
+                        <div>
+                            <div class="section-header">
+                                <div class="section-title"><i class="fas fa-layer-group"></i> 图文模版</div>
+                            </div>
+                            <div class="template-scroll" id="templateContainer"></div>
+                        </div>
+                        <div>
+                            <div class="section-title"><i class="fas fa-pen-fancy"></i> 文案总结</div>
+                            <div class="copy-group">
+                                <div class="field">
+                                    <label>标题 <span id="titleCount">0/30</span></label>
+                                    <input type="text" id="titleInput" placeholder="AI 生成或手动输入" />
+                                </div>
+                                <div class="field">
+                                    <label>正文 <span id="bodyCount">0/200</span></label>
+                                    <textarea id="bodyInput" rows="2" placeholder="AI 生成或手动编辑"></textarea>
+                                </div>
+                                <div class="copy-actions">
+                                    <div class="copy-history" id="copyHistoryWrap">
+                                        <button type="button" class="btn btn-outline-primary btn-sm" id="copyHistoryBtn" onclick="toggleCopyHistory(event)">
+                                            <i class="fas fa-clock-rotate-left"></i> 生成历史 <i class="fas fa-caret-down"></i>
+                                        </button>
+                                        <div class="copy-history-menu" id="copyHistoryMenu"></div>
+                                    </div>
+                                    <button class="btn btn-outline-primary btn-sm" id="regenerateBtn" onclick="handleRegenerate()"><i class="fas fa-rotate"></i> 重新生成</button>
+                                    <button class="btn btn-sm" onclick="clearCopy()"><i class="fas fa-undo"></i> 清空</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="image-area">
+                            <div class="section-header">
+                                <div class="section-title"><i class="fas fa-image"></i> 配图素材</div>
+                                <span class="section-hint" id="imageHistoryHint" hidden>含本次及之前生成</span>
+                            </div>
+                            <div class="image-preview-grid" id="imagePreviewGrid"></div>
+                            <div class="image-actions">
+                                <button class="btn btn-primary btn-sm" onclick="handleGenerateImages()"><i class="fas fa-wand-magic-sparkles"></i> AI生成</button>
+                                <button class="btn btn-outline-primary btn-sm" onclick="openPadImagePicker()"><i class="fas fa-image"></i> 垫图生成</button>
+                                <button class="btn btn-outline-primary btn-sm" onclick="openAssetSelector()"><i class="fas fa-th"></i> 选择 CEM 素材</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- RIGHT -->
+                    <div class="right-panel">
+                        <div class="section-title"><i class="fas fa-eye"></i> 实时预览</div>
+                        <div class="preview-touch-switcher" id="touchSwitcher"></div>
+                        <div class="preview-container" id="previewContainer"></div>
+                        <div style="margin-top:12px; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+                            <button class="btn btn-danger" onclick="confirmCloseGenerate()">
+                                <i class="fas fa-times"></i> 关闭
+                            </button>
+                            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                <button class="btn btn-outline-primary" id="saveOnlyBtn" onclick="handleSaveOnly()"><i class="fas fa-save"></i> 仅保存</button>
+                                <button class="btn btn-success" id="saveBtn" onclick="handleSave()"><i class="fas fa-check"></i> 保存到素材库</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ===== MODAL: Asset Selector ===== -->
+    <div class="modal-overlay asset-modal" id="assetModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>素材选择器</h3>
+                <div class="asset-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="assetSearchInput" placeholder="搜索" oninput="filterAssetSelector()" />
+                </div>
+                <button class="modal-close" onclick="closeAssetSelector()">&times;</button>
+            </div>
+            <div class="asset-filter-row">
+                <select id="assetFilterCreator" onchange="filterAssetSelector()"><option value="">创建者/创建部门</option><option>JOJO</option><option>王芳</option><option>李丽</option><option>张敏</option><option>赵静</option></select>
+                <select id="assetFilterFormat" class="has-value"><option value="">文件格式</option><option value="JPG" selected>JPG, JPEG, PNG, TIF, GIF</option></select>
+                <select><option>权限范围</option></select>
+                <select><option>时长</option></select>
+                <select><option>合规状态</option></select>
+                <select><option>创建时间</option></select>
+                <select><option>文件宽度/高度/宽高比</option></select>
+                <select class="has-value"><option>文件大小</option><option selected>100M以下</option></select>
+                <select><option>图片主色</option></select>
+                <button type="button" class="asset-link-btn">展开</button>
+                <button type="button" class="asset-link-btn" onclick="clearAssetFilters()">清空</button>
+            </div>
+            <div class="asset-meta-row">
+                <span>共 <strong id="totalAssetCount">0</strong> 项</span>
+                <button type="button" class="asset-sort-btn">更新时间 <i class="fas fa-sort-amount-down"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="asset-grid" id="assetGrid"></div>
+                <div class="pagination" id="assetPagination">
+                    <button id="prevPageBtn" onclick="changeAssetPage(-1)"><i class="fas fa-chevron-left"></i></button>
+                    <span class="page-info" id="pageInfo">第 1 / 1 页</span>
+                    <button id="nextPageBtn" onclick="changeAssetPage(1)"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+            <div class="modal-footer asset-footer">
+                <div class="asset-selected-info" id="assetDetailPanel">已选 <strong id="assetSelectedCount">0</strong>/1 个</div>
+                <button type="button" class="asset-files-btn">文件 (1) <span class="badge" id="assetFileBadge">0</span></button>
+                <span class="spacer"></span>
+                <button class="btn btn-primary" id="assetConfirmBtn" onclick="confirmAssetSelect()" disabled>确定</button>
+            </div>
+        </div>
+    </div>
+    <!-- ===== MODAL: Preview ===== -->
+    <div class="modal-overlay preview-modal" id="previewModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="fas fa-eye"></i> 内容预览</h3>
+                <button class="modal-close" onclick="closePreviewModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="previewModalBody"></div>
+        </div>
+    </div>
+    <!-- ===== MODAL: Library ===== -->
+    <div class="modal-overlay library-modal" id="libraryModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="fas fa-folder-open"></i> 素材库</h3>
+                <button class="modal-close" onclick="closeLibraryModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="library-sidebar">
+                    <div class="nav-item active"><i class="fas fa-th-list"></i> 全部素材</div>
+                    <div class="nav-item"><i class="fas fa-inbox"></i> 待入库</div>
+                    <div class="nav-divider"></div>
+                    <div class="nav-item"><i class="fas fa-star"></i> 我收藏的组</div>
+                    <div class="nav-item"><i class="fas fa-user"></i> 我创建的组</div>
+                    <div class="nav-footer"><i class="fas fa-ellipsis-h"></i> 更多功能</div>
+                </div>
+                <div class="library-main">
+                    <div class="library-toolbar">
+                        <input type="text" placeholder="试试在搜索词中增加文件格式，如：手册pdf" />
+                        <button class="upload-btn"><i class="fas fa-upload"></i> 上传</button>
+                    </div>
+                    <div class="library-tabs">
+                        <span class="tab active">全部素材</span>
+                        <span class="tab badge">待入库</span>
+                    </div>
+                    <div class="library-filters">
+                        <span class="filter-pill"><i class="fas fa-check-circle"></i> 颜色</span>
+                        <span class="filter-pill"><i class="fas fa-check-circle"></i> 创建者/创建部门</span>
+                        <span class="filter-pill"><i class="fas fa-check-circle"></i> 文件格式</span>
+                        <span class="filter-pill"><i class="fas fa-check-circle"></i> 创建时间</span>
+                        <span class="filter-pill"><i class="fas fa-check-circle"></i> 宽高比</span>
+                        <span class="filter-pill"><i class="fas fa-check-circle"></i> 文件大小</span>
+                        <span class="filter-pill"><i class="fas fa-check-circle"></i> 素材状态</span>
+                        <span class="filter-pill"><i class="fas fa-check-circle"></i> 失效时间</span>
+                        <span class="filter-pill"><i class="fas fa-check-circle"></i> 素材权限范围</span>
+                    </div>
+                    <div class="library-list">
+                        <div class="empty-icon"><i class="fas fa-folder-open"></i></div>
+                        <div class="empty-text">共0项</div>
+                        <div class="empty-sub">暂无素材组</div>
+                    </div>
+                    <div class="library-footer-actions">
+                        <span><i class="far fa-clock"></i> 创建时间</span>
+                        <span><i class="fas fa-user"></i> 我创建的组</span>
+                        <span><i class="fas fa-ellipsis-h"></i> 更多功能</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ===== SAVING OVERLAY ===== -->
+    <div class="saving-overlay" id="savingOverlay">
+        <div class="spinner-big"></div>
+        <div class="saving-text">保存中...</div>
+    </div>
+    <!-- ===== CLOSE CONFIRM OVERLAY ===== -->
+    <div class="confirm-overlay" id="confirmCloseOverlay">
+        <div class="confirm-box">
+            <div class="icon"><i class="fas fa-triangle-exclamation"></i></div>
+            <h4>确认关闭？</h4>
+            <p>当前编辑的内容尚未保存，关闭后将丢失。确定要退出吗？</p>
+            <div class="actions">
+                <button class="btn btn-outline-primary" onclick="closeConfirmClose()">继续编辑</button>
+                <button class="btn btn-danger" onclick="doCloseGenerate()">确定关闭</button>
+            </div>
+        </div>
+    </div>
+    <!-- Toast -->
+    <div class="toast-container" id="toastContainer"></div>
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT -->
+    <!-- ============================================================ -->
+    <script>
+        // ===== 真实爱他美产品图片池（公网稳定链接） =====
+        const APTAMIL_IMAGES = [
+            'https://aka.doubaocdn.com/s/EqyPW0rKTp',
+            'https://aka.doubaocdn.com/s/1ZxX46Q8EE',
+            'https://aka.doubaocdn.com/s/mSz9ZeR9AM',
+            'https://aka.doubaocdn.com/s/qO0hSedxaE',
+            'https://aka.doubaocdn.com/s/DSatvIUUQR',
+            'https://aka.doubaocdn.com/s/hrjWuunQ2q',
+            'https://aka.doubaocdn.com/s/1PBdIg80gA',
+            'https://aka.doubaocdn.com/s/mOKoTNZPs7',
+            'https://aka.doubaocdn.com/s/xarQ6cHNto',
+            'https://aka.doubaocdn.com/s/Tf5hubAgqx',
+            'https://aka.doubaocdn.com/s/8AIVemRWVr',
+            'https://aka.doubaocdn.com/s/1A5cJaQOLy',
+            'https://aka.doubaocdn.com/s/kW54Xv41Hv',
+            'https://aka.doubaocdn.com/s/mcfVb5SJgj',
+            'https://aka.doubaocdn.com/s/XSzRAoFBo3',
+            'https://aka.doubaocdn.com/s/KwxTMFzhhR',
+            'https://aka.doubaocdn.com/s/n0dHSQIpQU',
+            'https://aka.doubaocdn.com/s/JsVXVzo5Fz',
+            'https://aka.doubaocdn.com/s/iVlO2dxidQ',
+            'https://aka.doubaocdn.com/s/A9m2396Vul',
+            'https://aka.doubaocdn.com/s/ATf5VMYUsq',
+            'https://aka.doubaocdn.com/s/2KCTmlyfhL'
+        ];
+
+        function getProductImage(seed, width = 400, height = 300) {
+            let h = 0;
+            for (let i = 0; i < seed.length; i++) {
+                h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+            }
+            return APTAMIL_IMAGES[h % APTAMIL_IMAGES.length];
+        }
+
+        let contentItems = [{
+            id: 1,
+            title: '月满中秋 · 爱他美 GOAT 臻选',
+            desc: '中秋月圆，爱他美 GOAT 以臻稀营养守护宝宝成长。科学配比 DHA & 益生元，助力6-12月龄宝宝感知世界。',
+            fullTitle: '月满中秋 · 爱他美 GOAT 臻选',
+            fullBody: '中秋月圆，爱他美 GOAT 以臻稀营养守护宝宝成长。科学配比 DHA & 益生元，助力6-12月龄宝宝感知世界。#爱他美 #中秋',
+            touch: 'wecom',
+            node: 'midautumn',
+            audience: '6-12',
+            brand: 'aptamil',
+            product: 'goat',
+            image: getProductImage('card1', 400, 300),
+            imageId: 1,
+            template: 'modern',
+            status: 'in',
+            favorite: false,
+            creator: 'JOJO',
+            createdAt: '2026-08-20'
+        }, {
+            id: 2,
+            title: '中秋臻礼 · 爱他美 GOAT 守护成长',
+            desc: '月圆人团圆，爱他美 GOAT 为宝宝送上臻稀营养。每一滴都蕴含自然精华，科学配方支持认知与免疫发育。',
+            fullTitle: '中秋臻礼 · 爱他美 GOAT 守护成长',
+            fullBody: '月圆人团圆，爱他美 GOAT 为宝宝送上臻稀营养。每一滴都蕴含自然精华，科学配方支持认知与免疫发育。中秋佳节，愿每个宝贝都在爱中茁壮成长。',
+            touch: 'moments',
+            node: 'midautumn',
+            audience: '0-6',
+            brand: 'aptamil',
+            product: 'goat',
+            image: getProductImage('card2', 400, 300),
+            imageId: 2,
+            template: 'warm',
+            status: 'in',
+            favorite: true,
+            creator: 'JOJO',
+            createdAt: '2026-08-19'
+        }, {
+            id: 3,
+            title: '爱他美 ZHUOAO · 中秋品质之选',
+            desc: '爱他美 ZHUOAO 系列，源自欧洲纯净牧场，先进科研配方，为宝宝成长提供全面营养支持。中秋佳节，选择爱他美。',
+            fullTitle: '爱他美 ZHUOAO · 中秋品质之选',
+            fullBody: '爱他美 ZHUOAO 系列，源自欧洲纯净牧场，先进科研配方，为宝宝成长提供全面营养支持。中秋佳节，选择爱他美，让爱与健康常伴。',
+            touch: 'official',
+            node: 'midautumn',
+            audience: '6-12',
+            brand: 'aptamil',
+            product: 'zhuoao',
+            image: getProductImage('card3', 400, 300),
+            imageId: 3,
+            template: 'premium',
+            status: 'out',
+            favorite: false,
+            creator: '王芳',
+            createdAt: '2026-08-18'
+        }, {
+            id: 4,
+            title: 'GOAT 中秋，爱意满满',
+            desc: '爱他美 GOAT 臻选系列，以纯净营养陪伴宝宝探索世界。DHA + 益生元双重守护，团圆时刻，爱更浓。',
+            fullTitle: 'GOAT 中秋，爱意满满',
+            fullBody: '爱他美 GOAT 臻选系列，以纯净营养陪伴宝宝探索世界。DHA + 益生元双重守护，团圆时刻，爱更浓。',
+            touch: 'group',
+            node: 'midautumn',
+            audience: '6-12',
+            brand: 'aptamil',
+            product: 'goat',
+            image: getProductImage('card4', 400, 300),
+            imageId: 4,
+            template: 'festive',
+            status: 'out',
+            favorite: false,
+            creator: 'JOJO',
+            createdAt: '2026-08-17'
+        }, {
+            id: 5,
+            title: '爱他美 GOAT 中秋礼遇',
+            desc: '爱他美 GOAT 中秋专场，臻稀营养守护宝宝成长。点击进入小程序，领取专属优惠。',
+            fullTitle: '爱他美 GOAT 中秋礼遇',
+            fullBody: '爱他美 GOAT 中秋专场，臻稀营养守护宝宝成长。点击进入小程序，领取专属优惠。',
+            touch: 'miniapp',
+            node: 'midautumn',
+            audience: '0-6',
+            brand: 'aptamil',
+            product: 'goat',
+            image: getProductImage('card5', 400, 300),
+            imageId: 5,
+            template: 'nature',
+            status: 'in',
+            favorite: true,
+            creator: '李丽',
+            createdAt: '2026-08-16'
+        }, {
+            id: 6,
+            title: 'CNY · 爱他美 ZHUOZHEN 新春礼',
+            desc: '新春佳节，爱他美 ZHUOZHEN 以臻稀营养为宝宝送上健康祝福。科学配方，助力成长每一步。',
+            fullTitle: 'CNY · 爱他美 ZHUOZHEN 新春礼',
+            fullBody: '新春佳节，爱他美 ZHUOZHEN 以臻稀营养为宝宝送上健康祝福。科学配方，助力成长每一步。',
+            touch: 'wecom',
+            node: 'cny',
+            audience: '6-12',
+            brand: 'aptamil',
+            product: 'zhuozhen',
+            image: getProductImage('card6', 400, 300),
+            imageId: 3,
+            template: 'modern',
+            status: 'out',
+            favorite: false,
+            creator: '张敏',
+            createdAt: '2026-08-15'
+        }, {
+            id: 7,
+            title: '爱他美 GOAT · 朋友圈臻选',
+            desc: '爱他美 GOAT 臻选呵护，源自纯净牧场。DHA + 益生元双重守护，让成长加倍。',
+            fullTitle: '爱他美 GOAT · 朋友圈臻选',
+            fullBody: '爱他美 GOAT 臻选呵护，源自纯净牧场。DHA + 益生元双重守护，让成长加倍。',
+            touch: 'moments',
+            node: 'cny',
+            audience: '0-6',
+            brand: 'aptamil',
+            product: 'goat',
+            image: getProductImage('card7', 400, 300),
+            imageId: 2,
+            template: 'warm',
+            status: 'in',
+            favorite: false,
+            creator: '赵静',
+            createdAt: '2026-08-14'
+        }, {
+            id: 8,
+            title: '公众号 · 爱他美 ZHUOAO 品质',
+            desc: '爱他美 ZHUOAO 系列，先进科研配方，为宝宝成长提供全面营养支持。欢迎咨询选购。',
+            fullTitle: '公众号 · 爱他美 ZHUOAO 品质',
+            fullBody: '爱他美 ZHUOAO 系列，先进科研配方，为宝宝成长提供全面营养支持。欢迎咨询选购。',
+            touch: 'official',
+            node: 'cny',
+            audience: '6-12',
+            brand: 'aptamil',
+            product: 'zhuoao',
+            image: getProductImage('card8', 400, 300),
+            imageId: 1,
+            template: 'premium',
+            status: 'out',
+            favorite: false,
+            creator: 'JOJO',
+            createdAt: '2026-08-13'
+        }, {
+            id: 9,
+            title: '私域群 · GOAT 中秋福利',
+            desc: '群内专享：爱他美 GOAT 中秋特惠，臻稀营养助力宝宝成长。私域专属，不容错过。',
+            fullTitle: '私域群 · GOAT 中秋福利',
+            fullBody: '群内专享：爱他美 GOAT 中秋特惠，臻稀营养助力宝宝成长。私域专属，不容错过。',
+            touch: 'group',
+            node: 'midautumn',
+            audience: '6-12',
+            brand: 'aptamil',
+            product: 'goat',
+            image: getProductImage('card9', 400, 300),
+            imageId: 4,
+            template: 'festive',
+            status: 'in',
+            favorite: false,
+            creator: '王芳',
+            createdAt: '2026-08-12'
+        }, {
+            id: 10,
+            title: '小程序 · 爱他美 GOAT 礼遇',
+            desc: '爱他美 GOAT 系列小程序专享，科学配方，纯净营养。中秋好礼，尽在指尖。',
+            fullTitle: '小程序 · 爱他美 GOAT 礼遇',
+            fullBody: '爱他美 GOAT 系列小程序专享，科学配方，纯净营养。中秋好礼，尽在指尖。',
+            touch: 'miniapp',
+            node: 'midautumn',
+            audience: '0-6',
+            brand: 'aptamil',
+            product: 'goat',
+            image: getProductImage('card10', 400, 300),
+            imageId: 5,
+            template: 'nature',
+            status: 'out',
+            favorite: false,
+            creator: '李丽',
+            createdAt: '2026-08-11'
+        }, {
+            id: 11,
+            title: '爱他美 GOAT · 月满臻爱',
+            desc: '月满中秋，爱他美 GOAT 以臻稀营养守护宝宝成长。科学配比 DHA & 益生元，助力6-12月龄宝宝感知世界。#爱他美 #中秋',
+            fullTitle: '爱他美 GOAT · 月满臻爱',
+            fullBody: '月满中秋，爱他美 GOAT 以臻稀营养守护宝宝成长。科学配比 DHA & 益生元，助力6-12月龄宝宝感知世界。#爱他美 #中秋',
+            touch: 'wecom',
+            node: 'midautumn',
+            audience: '6-12',
+            brand: 'aptamil',
+            product: 'goat',
+            image: getProductImage('card11', 400, 300),
+            imageId: 1,
+            template: 'modern',
+            status: 'in',
+            favorite: false,
+            creator: 'JOJO',
+            createdAt: '2026-08-10'
+        }, {
+            id: 12,
+            title: 'CNY · 爱他美 ZHUOZHEN 新年礼',
+            desc: '新年新气象，爱他美 ZHUOZHEN 为宝宝送上健康祝福。臻稀营养，助力成长。',
+            fullTitle: 'CNY · 爱他美 ZHUOZHEN 新年礼',
+            fullBody: '新年新气象，爱他美 ZHUOZHEN 为宝宝送上健康祝福。臻稀营养，助力成长。',
+            touch: 'moments',
+            node: 'cny',
+            audience: '0-6',
+            brand: 'aptamil',
+            product: 'zhuozhen',
+            image: getProductImage('card12', 400, 300),
+            imageId: 2,
+            template: 'warm',
+            status: 'out',
+            favorite: false,
+            creator: '张敏',
+            createdAt: '2026-08-09'
+        }];
+
+        const assetLibrary = [
+            { id: 1, label: '爱他美 卓傲', icon: 'fa-baby', format: 'PNG', size: '4.2MB', creator: 'JOJO',
+                ratio: '16:9', brand: 'aptamil', imageUrl: 'https://aka.doubaocdn.com/s/hrjWuunQ2q' },
+            { id: 2, label: '爱他美 卓萃', icon: 'fa-seedling', format: 'PNG', size: '3.8MB', creator: 'JOJO',
+                ratio: '4:3', brand: 'aptamil', imageUrl: 'https://aka.doubaocdn.com/s/EqyPW0rKTp' },
+            { id: 3, label: '爱他美 经典版', icon: 'fa-star', format: 'JPG', size: '5.1MB', creator: 'JOJO',
+                ratio: '16:9', brand: 'aptamil', imageUrl: 'https://aka.doubaocdn.com/s/8AIVemRWVr' },
+            { id: 4, label: '爱他美 澳洲版', icon: 'fa-globe', format: 'JPG', size: '7.8MB', creator: 'JOJO',
+                ratio: '16:9', brand: 'aptamil', imageUrl: 'https://aka.doubaocdn.com/s/XSzRAoFBo3' },
+            { id: 5, label: '爱他美 德国版', icon: 'fa-flag', format: 'JPG', size: '6.8MB', creator: 'JOJO',
+                ratio: '16:9', brand: 'aptamil', imageUrl: 'https://aka.doubaocdn.com/s/JsVXVzo5Fz' },
+        ];
+
+        const assetSelectorLibrary = [];
+        const selectorSeeds = ['scene1', 'scene2', 'scene3', 'scene4', 'scene5', 'scene6', 'scene7', 'scene8', 'scene9',
+            'scene10',
+            'scene11', 'scene12', 'scene13', 'scene14', 'scene15', 'scene16', 'scene17', 'scene18', 'scene19', 'scene20',
+            'scene21', 'scene22', 'scene23', 'scene24', 'scene25', 'scene26', 'scene27', 'scene28', 'scene29', 'scene30'
+        ];
+        selectorSeeds.forEach((seed, index) => {
+            const id = 100 + index;
+            const formats = ['PNG', 'JPG', 'TIF'];
+            const creators = ['JOJO', '王芳', '李丽', '张敏', '赵静'];
+            const ratios = ['16:9', '4:3', '3:2', '1:1'];
+            const labels = ['爱他美GOAT中秋礼盒', '卓傲罐装场景图', '卓萃亲子客厅', '经典版货架陈列', '澳洲版牧场晨光',
+                '德国版蓝罐特写', '0-6月龄辅食场景', '6-12月龄成长记录', '中秋团圆餐桌', 'CNY红金礼盒',
+                '母婴门店灯箱', '朋友圈方形海报', '企微卡片配图', '小程序头图', '公众号封面',
+                '山羊奶粉静物', '白罐金盖特写', '礼盒丝带静物', '暖光婴儿房', '节日灯笼背景',
+                '产品俯拍静物', '开罐细节', '量勺特写', '奶瓶与奶粉', '橱窗陈列',
+                '货架近景', '礼袋与贺卡', '月光窗台', '新春窗花', '自然草甸'];
+            assetSelectorLibrary.push({
+                id: id,
+                label: labels[index] || `素材 ${index+1}`,
+                icon: 'fa-image',
+                format: formats[index % formats.length],
+                size: (Math.random() * 10 + 1).toFixed(1) + 'MB',
+                creator: creators[index % creators.length],
+                ratio: ratios[index % ratios.length],
+                imageUrl: getProductImage('selector_' + seed, 400, 300)
+            });
+        });
+
+        const templateList = [
+            { id: 't1', name: '现代简约', preview: 'modern' },
+            { id: 't2', name: '温暖亲和', preview: 'warm' },
+            { id: 't3', name: '臻享质感', preview: 'premium' },
+            { id: 't4', name: '节日氛围', preview: 'festive' },
+            { id: 't5', name: '自然清新', preview: 'nature' },
+        ];
+
+        const templateStyleMap = {
+            'modern': { fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                titleColor: '#1a1a1a', titleSize: '19px', textColor: '#4a4a4a', textSize: '14px',
+                metaColor: '#94a3b8', borderColor: '#e2e8f0', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' },
+            'warm': { fontFamily: 'Georgia, "Times New Roman", serif', titleColor: '#8B4513', titleSize: '21px',
+                textColor: '#5d4037', textSize: '15px', metaColor: '#a1887f', borderColor: '#f5cba7',
+                boxShadow: '0 4px 20px rgba(210, 105, 30, 0.12)' },
+            'premium': { fontFamily: '"Palatino Linotype", "Book Antiqua", Palatino, serif', titleColor: '#8b6914',
+                titleSize: '20px', textColor: '#4a3a2a', textSize: '14px', metaColor: '#b8860b',
+                borderColor: '#b8860b', boxShadow: '0 4px 28px rgba(0,0,0,0.08)' },
+            'festive': { fontFamily: '"Arial Black", "Impact", sans-serif', titleColor: '#c0392b',
+                titleSize: '22px', textColor: '#7b2d26', textSize: '15px', metaColor: '#e74c3c',
+                borderColor: '#c0392b', boxShadow: '0 4px 24px rgba(192, 57, 43, 0.10)' },
+            'nature': { fontFamily: '"Trebuchet MS", "Lucida Sans Unicode", sans-serif', titleColor: '#2e7d32',
+                titleSize: '18px', textColor: '#3e5a3e', textSize: '14px', metaColor: '#66bb6a',
+                borderColor: '#43a047', boxShadow: '0 4px 24px rgba(67, 160, 71, 0.10)' }
+        };
+
+        // ===== STATE =====
+        const state = {
+            brand: '',
+            product: '',
+            touchpoints: [],
+            node: '',
+            audience: '',
+            template: 'modern',
+            touchCopy: {},
+            imageId: null,
+        };
+
+        const MAX_COPY_VERSIONS = 5;
+        const MAX_IMAGE_HISTORY = 12;
+        let copyVersions = [];
+        let currentCopyVersion = -1;
+        let copyVersionSeq = 0;
+        let isGenerating = false;
+        let selectedAssetId = null;
+        let assetSelectorMode = 'library';
+        let generatedImages = [];
+        let activeTouch = 'wecom';
+        let assetPage = 1;
+        const pageSize = 12;
+        let currentListTab = 'all';
+        let currentListFilter = 'all';
+        let currentStatusFilter = 'all'; // 新增状态筛选
+        let listSearchQuery = '';
+        let editingCardId = null;
+        let pendingListTab = null;
+
+        // ===== DOM REFS =====
+        const $ = id => document.getElementById(id);
+        const brandSel = $('brandSelect');
+        const productSel = $('productSelect');
+        const touchSel = $('touchSelect');
+        const nodeSel = $('nodeSelect');
+        const audSel = $('audSelect');
+        const titleInp = $('titleInput');
+        const bodyInp = $('bodyInput');
+        const generateBtn = $('generateBtn');
+        const assetGrid = $('assetGrid');
+        const assetModal = $('assetModal');
+        const assetDetailPanel = $('assetDetailPanel');
+        const imagePreviewGrid = $('imagePreviewGrid');
+        const touchSwitcher = $('touchSwitcher');
+        const previewContainer = $('previewContainer');
+        const saveBtn = $('saveBtn');
+        const saveOnlyBtn = $('saveOnlyBtn');
+        const listView = $('listView');
+        const generateView = $('generateView');
+        const cardGrid = $('cardGrid');
+        const listTitle = $('listTitle');
+        const previewModal = $('previewModal');
+        const previewModalBody = $('previewModalBody');
+
+        // ===== LIST =====
+        function getFilteredItems() {
+            let items = [...contentItems];
+            if (currentListTab === 'favorites') {
+                items = items.filter(i => i.favorite === true);
+            } else if (currentListTab === 'created') {
+                items = items.filter(i => i.creator === 'JOJO');
+            }
+            if (currentListFilter !== 'all') {
+                items = items.filter(i => i.touch === currentListFilter);
+            }
+            // 状态筛选
+            if (currentStatusFilter !== 'all') {
+                items = items.filter(i => i.status === currentStatusFilter);
+            }
+            if (listSearchQuery.trim()) {
+                const q = listSearchQuery.trim().toLowerCase();
+                items = items.filter(i =>
+                    i.title.toLowerCase().includes(q) ||
+                    i.desc.toLowerCase().includes(q) ||
+                    i.creator.toLowerCase().includes(q)
+                );
+            }
+            return items;
+        }
+
+        function saveCardToLibrary(id) {
+            const item = contentItems.find(i => i.id === id);
+            if (!item || item.status === 'in') return;
+            const btn = document.querySelector(`.card-actions[data-card-id="${id}"] .btn-save-library`);
+            if (btn) { btn.disabled = true;
+                btn.innerHTML = '<span class="spinner" style="width:14px;height:14px;border-width:2px;"></span>'; }
+            setTimeout(() => {
+                item.status = 'in';
+                renderCardGrid();
+                showToast('✅ 已保存到素材库', 'success');
+            }, 600);
+        }
+
+        function renderCardGrid() {
+            const items = getFilteredItems();
+            const touchMap = { 'wecom': '企微', 'moments': '朋友圈', 'group': '私域群', 'miniapp': '小程序', 'official': '公众号' };
+            const nodeMap = { 'midautumn': '中秋', 'cny': 'CNY' };
+            const audMap = { '0-6': '0-6月', '6-12': '6-12月' };
+            cardGrid.innerHTML = '';
+            if (items.length === 0) {
+                cardGrid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-folder-open"></i>
+                        <p>暂无内容</p>
+                        <span style="font-size:13px; color:var(--gray-400);">点击「制作内容」创建新内容</span>
+                    </div>
+                `;
+                return;
+            }
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'content-card';
+                const isFav = item.favorite;
+                const statusLabel = item.status === 'in' ? '已入库' : '待入库';
+                const statusCls = item.status === 'in' ? 'in' : 'out';
+                const touchLabel = touchMap[item.touch] || item.touch;
+                const nodeLabel = nodeMap[item.node] || '';
+                const audLabel = audMap[item.audience] || '';
+                let actionHtml = '';
+                if (item.status === 'out') {
+                    actionHtml = `
+                        <button class="btn-save-library" onclick="saveCardToLibrary(${item.id})" data-card-id="${item.id}">
+                            <i class="fas fa-archive"></i> 保存到素材库
+                        </button>
+                    `;
+                } else {
+                    actionHtml = `<span class="status-text in"><i class="fas fa-check-circle"></i> 已入库</span>`;
+                }
+                card.innerHTML = `
+                    <div class="card-img" style="background-image:url(${item.image});">
+                        <i class="fas fa-image" style="opacity:0.4; font-size:40px;"></i>
+                        <span class="status-badge ${statusCls}">${statusLabel}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-title">${item.title}</div>
+                        <div class="card-desc">${item.desc}</div>
+                        <div class="card-meta">
+                            <span><i class="fas fa-bullseye"></i> ${touchLabel}</span>
+                            ${nodeLabel ? `<span><i class="fas fa-calendar"></i> ${nodeLabel}</span>` : ''}
+                            ${audLabel ? `<span><i class="fas fa-users"></i> ${audLabel}</span>` : ''}
+                            <span class="tag-pill">${item.creator}</span>
+                            <span>${item.createdAt}</span>
+                        </div>
+                    </div>
+                    <div class="card-actions" data-card-id="${item.id}">
+                        <button class="btn-icon-sm edit" onclick="editCard(${item.id})" title="编辑">
+                            <i class="fas fa-pen"></i>
+                        </button>
+                        <button class="btn-icon-sm preview" onclick="previewCard(${item.id})" title="预览">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-icon-sm ${isFav ? 'favorited' : ''}" onclick="toggleFavorite(${item.id})" title="收藏">
+                            <i class="fas ${isFav ? 'fa-star' : 'fa-star'}"></i>
+                        </button>
+                        <span class="spacer"></span>
+                        ${actionHtml}
+                    </div>
+                `;
+                cardGrid.appendChild(card);
+            });
+            updateCounts();
+        }
+
+        function updateCounts() {
+            const all = contentItems.length;
+            const favs = contentItems.filter(i => i.favorite).length;
+            const created = contentItems.filter(i => i.creator === 'JOJO').length;
+            $('countAll').textContent = all;
+            $('countFavorites').textContent = favs;
+            $('countCreated').textContent = created;
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('mainSidebar');
+            const collapsed = sidebar.classList.toggle('collapsed');
+            const btn = document.getElementById('sidebarToggle');
+            const label = collapsed ? '展开侧栏' : '收起侧栏';
+            if (btn) {
+                btn.title = label;
+                btn.setAttribute('aria-label', label);
+            }
+            try { localStorage.setItem('sidebarCollapsed', collapsed ? '1' : '0'); } catch (e) {}
+        }
+
+        function restoreSidebarState() {
+            try {
+                if (localStorage.getItem('sidebarCollapsed') === '1') {
+                    const sidebar = document.getElementById('mainSidebar');
+                    const btn = document.getElementById('sidebarToggle');
+                    sidebar.classList.add('collapsed');
+                    if (btn) {
+                        btn.title = '展开侧栏';
+                        btn.setAttribute('aria-label', '展开侧栏');
+                    }
+                }
+            } catch (e) {}
+        }
+
+        function applyListTab(tab) {
+            currentListTab = tab;
+            document.querySelectorAll('#mainSidebar .nav-item').forEach(el => {
+                el.classList.toggle('active', el.dataset.view === tab);
+            });
+            const titles = { 'all': '全部内容', 'favorites': '我收藏的', 'created': '我创建的' };
+            listTitle.textContent = titles[tab] || '全部内容';
+            renderCardGrid();
+        }
+
+        function switchListTab(tab) {
+            if (generateView.classList.contains('active')) {
+                const hasContent = Object.keys(state.touchCopy).length > 0 || generatedImages.length > 0;
+                if (hasContent) {
+                    pendingListTab = tab;
+                    document.getElementById('confirmCloseOverlay').classList.add('open');
+                    return;
+                }
+                goToList();
+            }
+            applyListTab(tab);
+        }
+
+        function setListFilter(filter, el) {
+            currentListFilter = filter;
+            document.querySelectorAll('.list-filter-bar .tag[data-filter]').forEach(t => t.classList.remove('active'));
+            if (el) el.classList.add('active');
+            renderCardGrid();
+        }
+
+        // 新增状态筛选函数
+        function setStatusFilter(status, el) {
+            currentStatusFilter = status;
+            document.querySelectorAll('.list-filter-bar .tag[data-status]').forEach(t => t.classList.remove('active'));
+            if (el) el.classList.add('active');
+            renderCardGrid();
+        }
+
+        function filterList() {
+            listSearchQuery = $('listSearch').value;
+            renderCardGrid();
+        }
+
+        function editCard(id) {
+            const item = contentItems.find(i => i.id === id);
+            if (!item) return;
+            loadContentForEdit(item);
+            openGenerateView();
+            showToast(`✏️ 正在编辑: ${item.title}`, 'info');
+        }
+
+        function loadContentForEdit(item) {
+            brandSel.value = item.brand || '';
+            productSel.value = item.product || '';
+            touchSel.value = item.touch || '';
+            nodeSel.value = item.node || '';
+            audSel.value = item.audience || '';
+            onFilterChange();
+            const templateId = item.template || 'modern';
+            document.querySelectorAll('.template-card').forEach(el => {
+                const isActive = el.dataset.template === templateId;
+                el.classList.toggle('active', isActive);
+                if (isActive) state.template = templateId;
+            });
+            if (!document.querySelector('.template-card.active')) {
+                const first = document.querySelector('.template-card');
+                if (first) { first.classList.add('active');
+                    state.template = first.dataset.template; }
+            }
+            const touch = item.touch || 'wecom';
+            state.touchCopy = {};
+            state.touchCopy[touch] = { title: item.fullTitle || item.title, body: item.fullBody || item.desc };
+            titleInp.value = state.touchCopy[touch].title;
+            bodyInp.value = state.touchCopy[touch].body;
+            updateCharCount();
+            const imageId = item.imageId || 1;
+            const imgAsset = assetLibrary.find(a => a.id === imageId);
+            if (imgAsset) { generatedImages = [imgAsset];
+                state.imageId = imgAsset.id;
+                renderImageOptions(); } else { generatedImages = [assetLibrary[0]];
+                state.imageId = assetLibrary[0].id;
+                renderImageOptions(); }
+            editingCardId = item.id;
+            copyVersionSeq = 1;
+            copyVersions = [{ n: 1, title: titleInp.value, body: bodyInp.value }];
+            currentCopyVersion = 0;
+            renderCopyVersions();
+            renderPreview(false);
+        }
+
+        function previewCard(id) {
+            const item = contentItems.find(i => i.id === id);
+            if (!item) return;
+            renderPreviewModal(item);
+        }
+
+        // ===== 辅助：分割正文为段落 =====
+        function splitParagraphs(text) {
+            let parts = text.split(/([。！？!?])/);
+            let result = [];
+            for (let i = 0; i < parts.length; i += 2) {
+                let p = (parts[i] || '').trim();
+                if (p) {
+                    let punct = parts[i + 1] || '';
+                    result.push(p + punct);
+                }
+            }
+            if (result.length < 3) {
+                const defaults = [
+                    '爱他美始终秉持“为生命早期提供最佳营养”的使命，汇聚全球科研智慧，打造高品质配方。',
+                    '每一罐爱他美奶粉都源自欧洲纯净牧场，从源头把控品质，让妈妈更安心。',
+                    '科学配比DHA、益生元组合及多种维生素矿物质，全面支持宝宝认知力、免疫力与消化系统的健康发展。'
+                ];
+                while (result.length < 3) {
+                    result.push(defaults[result.length % defaults.length]);
+                }
+            }
+            return result;
+        }
+
+        // ===== 渲染公众号长图文 =====
+        function renderOfficialLong(title, body, imgUrl, brandLabel, productLabel, nodeLabel) {
+            const paragraphs = splitParagraphs(body);
+            let contentHtml = '';
+            const imgUrls = [imgUrl, ...assetLibrary.map(a => a.imageUrl)].filter(Boolean);
+            paragraphs.forEach((p, idx) => {
+                contentHtml += `<p>${p}</p>`;
+                if ((idx + 1) % 2 === 0 && idx < paragraphs.length - 1) {
+                    const imgSrc = imgUrls[idx % imgUrls.length] || imgUrl;
+                    contentHtml += `<div class="inline-img" style="background-image:url(${imgSrc});"></div>`;
+                }
+            });
+            contentHtml += `
+                <div class="blockquote">
+                    “爱他美，以臻稀营养守护每个宝宝的成长奇迹。”
+                </div>
+            `;
+            contentHtml += `<p>关注爱他美官方公众号，获取更多科学育儿知识与专属福利。让爱，从第一口开始。</p>`;
+
+            return `
+                <div class="preview-card official-long" style="font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif; border-color: #e5e5e5; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+                    <div class="official-cover" style="background-image:url(${imgUrl});">
+                        <div style="width:100%;">
+                            <span class="cover-tag"><i class="fas fa-newspaper"></i> 公众号</span>
+                            <h1>${title}</h1>
+                            <div class="cover-sub">${brandLabel} · ${productLabel} ${nodeLabel ? '· ' + nodeLabel : ''}</div>
+                        </div>
+                    </div>
+                    <div class="official-body">
+                        <div class="article-meta">
+                            <span><i class="fas fa-building"></i> ${brandLabel}</span>
+                            <span><i class="far fa-clock"></i> 今天 16:30</span>
+                            <span><i class="fas fa-eye"></i> 1.2万</span>
+                        </div>
+                        <div class="article-content">
+                            ${contentHtml}
+                        </div>
+                        <div class="article-footer">
+                            <span class="read-more">阅读原文</span>
+                            <div class="actions">
+                                <span><i class="far fa-heart"></i> 在看 126</span>
+                                <span><i class="far fa-comment"></i> 留言 18</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ===== 预览渲染（主入口） =====
+        function renderPreview(empty = false) {
+            previewContainer.innerHTML = '';
+            if (empty || !state.brand || !state.product || Object.keys(state.touchCopy).length === 0) {
+                const div = document.createElement('div');
+                div.className = 'preview-card default-preview';
+                div.innerHTML =
+                    `<div class="card-img"><i class="fas fa-image"></i><span>配图占位</span></div><div class="card-body"><div class="card-title">等待生成内容</div><div class="card-text">请选择品牌、产品线和传播渠道，点击「生成内容」</div></div>`;
+                previewContainer.appendChild(div);
+                return;
+            }
+
+            const currentTouch = activeTouch || 'wecom';
+            let copy = state.touchCopy[currentTouch];
+            if (!copy) {
+                const keys = Object.keys(state.touchCopy);
+                if (keys.length > 0) copy = state.touchCopy[keys[0]];
+                else { const d = document.createElement('div');
+                    d.className = 'preview-card default-preview';
+                    d.innerHTML = `<div class="card-body"><div class="card-title">无文案</div></div>`;
+                    previewContainer.appendChild(d); return; }
+            }
+
+            const title = copy.title || '（无标题）';
+            const body = copy.body || '（无正文）';
+            const img = assetLibrary.find(i => i.id === state.imageId) || (generatedImages.length ? generatedImages[0] :
+            null);
+            const imgUrl = img ? img.imageUrl : '';
+            const brandMap = { 'aptamil': '爱他美' };
+            const productMap = { 'zhuoao': 'ZHUOAO', 'goat': 'GOAT', 'zhuozhen': 'ZHUOZHEN' };
+            const touchMap = { 'wecom': '企微', 'moments': '朋友圈', 'group': '私域群', 'miniapp': '小程序', 'official': '公众号' };
+            const nodeMap = { 'midautumn': '中秋', 'cny': 'CNY' };
+            const audMap = { '0-6': '0-6月', '6-12': '6-12月' };
+            const brandLabel = brandMap[state.brand] || '品牌';
+            const productLabel = productMap[state.product] || '产品';
+            const touchLabel = touchMap[currentTouch] || currentTouch;
+            const nodeLabel = nodeMap[state.node] || '';
+            const audLabel = audMap[state.audience] || '';
+            const touchType = currentTouch;
+            const style = templateStyleMap[state.template] || templateStyleMap['modern'];
+
+            let cardHtml = '';
+
+            if (touchType === 'wecom') {
+                cardHtml = `
+                    <div class="preview-card wecom" style="font-family:${style.fontFamily}; border-color:${style.borderColor}; box-shadow:${style.boxShadow};">
+                        <div class="wecom-header">
+                            <div class="avatar">${brandLabel.charAt(0)}</div>
+                            <span class="sender" style="color:${style.titleColor};">${brandLabel} · 内容运营</span>
+                            <span class="time">今天 14:32</span>
+                        </div>
+                        <div class="wecom-body">
+                            <div class="text-content" style="color:${style.textColor}; font-size:${style.textSize};">${body}</div>
+                            <div class="wecom-card">
+                                <div class="card-img" style="background-image:url(${imgUrl});"></div>
+                                <div class="card-info">
+                                    <div class="card-title" style="color:${style.titleColor}; font-size:${style.titleSize};">${title}</div>
+                                    <div class="card-desc" style="color:${style.textColor};">${body.length > 30 ? body.slice(0,30)+'…' : body}</div>
+                                    <div class="card-source" style="color:${style.metaColor};">${brandLabel} · ${productLabel}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="wecom-footer" style="color:${style.metaColor};">
+                            <span><i class="far fa-comment"></i> 3</span>
+                            <span><i class="far fa-heart"></i> 12</span>
+                            <span><i class="far fa-eye"></i> 256</span>
+                        </div>
+                    </div>
+                `;
+            } else if (touchType === 'moments') {
+                cardHtml = `
+                    <div class="preview-card moments" style="font-family:${style.fontFamily}; border-color:${style.borderColor}; box-shadow:${style.boxShadow};">
+                        <div class="moments-header">
+                            <div class="avatar">${brandLabel.charAt(0)}</div>
+                            <span class="name" style="color:${style.titleColor};">${brandLabel} · ${productLabel}</span>
+                            <span class="time">刚刚</span>
+                        </div>
+                        <div class="moments-text" style="color:${style.textColor}; font-size:${style.textSize};">${body}</div>
+                        <div class="moments-images">
+                            <div class="m-img single" style="background-image:url(${imgUrl});"></div>
+                        </div>
+                    </div>
+                `;
+            } else if (touchType === 'miniapp') {
+                cardHtml = `
+                    <div class="preview-card miniapp" style="font-family:${style.fontFamily}; border-color:${style.borderColor}; box-shadow:${style.boxShadow};">
+                        <div class="miniapp-img" style="background-image:url(${imgUrl});">
+                            <div class="miniapp-tag"><i class="fas fa-tag"></i> ${nodeLabel || '精选'}</div>
+                        </div>
+                        <div class="miniapp-body">
+                            <div class="miniapp-title" style="color:${style.titleColor}; font-size:${style.titleSize};">${title}</div>
+                            <div class="miniapp-desc" style="color:${style.textColor}; font-size:${style.textSize};">${body}</div>
+                        </div>
+                        <div class="miniapp-footer">
+                            <div class="miniapp-brand">
+                                <div class="brand-icon"><i class="fas fa-cube"></i></div>
+                                <span style="color:${style.textColor};">${brandLabel} · ${productLabel}</span>
+                            </div>
+                            <span class="miniapp-btn" style="background:${style.titleColor};">打开小程序</span>
+                        </div>
+                    </div>
+                `;
+            } else if (touchType === 'official') {
+                cardHtml = renderOfficialLong(title, body, imgUrl, brandLabel, productLabel, nodeLabel);
+            } else if (touchType === 'group') {
+                cardHtml = `
+                    <div class="preview-card group" style="font-family:${style.fontFamily}; border-color:${style.borderColor}; box-shadow:${style.boxShadow};">
+                        <div class="group-header">
+                            <div class="group-avatar"><i class="fas fa-users"></i></div>
+                            <span class="group-name" style="color:${style.titleColor};">${brandLabel} · 私域福利群</span>
+                            <span class="group-member"><i class="fas fa-user"></i> 128人</span>
+                        </div>
+                        <div class="group-sender" style="color:${style.metaColor};">${brandLabel} 内容运营 · 14:32</div>
+                        <div class="group-text" style="color:${style.textColor};">${body}</div>
+                        <div class="group-card">
+                            <div class="group-card-img" style="background-image:url(${imgUrl});"></div>
+                            <div class="group-card-info">
+                                <div class="group-card-title" style="color:${style.titleColor};">${title}</div>
+                                <div class="group-card-desc" style="color:${style.textColor};">${body.length > 30 ? body.slice(0,30)+'…' : body}</div>
+                            </div>
+                        </div>
+                        <div class="group-footer" style="color:${style.metaColor};">
+                            <span><i class="far fa-comment"></i> 3</span>
+                            <span><i class="far fa-heart"></i> 8</span>
+                            <span><i class="fas fa-share"></i> 分享</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                cardHtml = `
+                    <div class="preview-card default-preview" style="font-family:${style.fontFamily}; border-color:${style.borderColor}; box-shadow:${style.boxShadow};">
+                        <div class="card-img" style="background-image:url(${imgUrl}); background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; color:#fff; font-size:40px;">
+                            <i class="fas ${img ? img.icon : 'fa-image'}"></i>
+                            <span style="position:absolute; bottom:10px; background:rgba(0,0,0,0.5); padding:2px 12px; border-radius:12px; font-size:12px;">${img ? img.label : '配图'}</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-title" style="color:${style.titleColor}; font-size:${style.titleSize};">${title} <span class="badge-node" style="font-size:11px; font-weight:600; color:${style.titleColor}; background:var(--primary-bg); padding:2px 10px; border-radius:20px; margin-left:8px;">${touchLabel}</span></div>
+                            <div class="card-text" style="color:${style.textColor}; font-size:${style.textSize};">${body}</div>
+                            <div class="card-meta" style="color:${style.metaColor};">
+                                <span><i class="fas fa-building"></i> ${brandLabel}</span>
+                                <span><i class="fas fa-box"></i> ${productLabel}</span>
+                                <span><i class="fas fa-bullseye"></i> ${touchLabel}</span>
+                                ${audLabel ? `<span><i class="fas fa-users"></i> ${audLabel}</span>` : ''}
+                                ${nodeLabel ? `<span><i class="fas fa-calendar"></i> ${nodeLabel}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = cardHtml;
+            previewContainer.appendChild(wrapper.firstElementChild);
+            if (copy) { titleInp.value = copy.title;
+                bodyInp.value = copy.body;
+                updateCharCount(); }
+        }
+
+        // ===== 模态框预览：同样区分触点，公众号用长图文 =====
+        function renderPreviewModal(item) {
+            const touchMap = { 'wecom': '企微', 'moments': '朋友圈', 'group': '私域群', 'miniapp': '小程序', 'official': '公众号' };
+            const nodeMap = { 'midautumn': '中秋', 'cny': 'CNY' };
+            const audMap = { '0-6': '0-6月', '6-12': '6-12月' };
+            const brandMap = { 'aptamil': '爱他美' };
+            const productMap = { 'zhuoao': 'ZHUOAO', 'goat': 'GOAT', 'zhuozhen': 'ZHUOZHEN' };
+            const brandLabel = brandMap[item.brand] || '品牌';
+            const productLabel = productMap[item.product] || '产品';
+            const touchLabel = touchMap[item.touch] || item.touch;
+            const nodeLabel = nodeMap[item.node] || '';
+            const audLabel = audMap[item.audience] || '';
+            const style = templateStyleMap[item.template] || templateStyleMap['modern'];
+            const touchType = item.touch || 'wecom';
+            const title = item.fullTitle || item.title;
+            const body = item.fullBody || item.desc;
+            const imgUrl = item.image || '';
+
+            let cardHtml = '';
+
+            if (touchType === 'wecom') {
+                cardHtml = `
+                    <div class="preview-card wecom" style="font-family:${style.fontFamily}; border-color:${style.borderColor}; box-shadow:${style.boxShadow};">
+                        <div class="wecom-header"><div class="avatar">${brandLabel.charAt(0)}</div><span class="sender" style="color:${style.titleColor};">${brandLabel} · 内容运营</span><span class="time">今天 14:32</span></div>
+                        <div class="wecom-body"><div class="text-content" style="color:${style.textColor}; font-size:${style.textSize};">${body}</div>
+                        <div class="wecom-card"><div class="card-img" style="background-image:url(${imgUrl});"></div><div class="card-info"><div class="card-title" style="color:${style.titleColor}; font-size:${style.titleSize};">${title}</div><div class="card-desc" style="color:${style.textColor};">${body.length > 30 ? body.slice(0,30)+'…' : body}</div><div class="card-source" style="color:${style.metaColor};">${brandLabel} · ${productLabel}</div></div></div></div>
+                        <div class="wecom-footer" style="color:${style.metaColor};"><span><i class="far fa-comment"></i> 3</span><span><i class="far fa-heart"></i> 12</span><span><i class="far fa-eye"></i> 256</span></div>
+                    </div>
+                `;
+            } else if (touchType === 'moments') {
+                cardHtml = `
+                    <div class="preview-card moments" style="font-family:${style.fontFamily}; border-color:${style.borderColor}; box-shadow:${style.boxShadow};">
+                        <div class="moments-header"><div class="avatar">${brandLabel.charAt(0)}</div><span class="name" style="color:${style.titleColor};">${brandLabel} · ${productLabel}</span><span class="time">刚刚</span></div>
+                        <div class="moments-text" style="color:${style.textColor}; font-size:${style.textSize};">${body}</div>
+                        <div class="moments-images"><div class="m-img single" style="background-image:url(${imgUrl});"></div></div>
+                    </div>
+                `;
+            } else if (touchType === 'miniapp') {
+                cardHtml = `
+                    <div class="preview-card miniapp" style="font-family:${style.fontFamily}; border-color:${style.borderColor}; box-shadow:${style.boxShadow};">
+                        <div class="miniapp-img" style="background-image:url(${imgUrl});"><div class="miniapp-tag"><i class="fas fa-tag"></i> ${nodeLabel || '精选'}</div></div>
+                        <div class="miniapp-body"><div class="miniapp-title" style="color:${style.titleColor}; font-size:${style.titleSize};">${title}</div><div class="miniapp-desc" style="color:${style.textColor}; font-size:${style.textSize};">${body}</div></div>
+                        <div class="miniapp-footer"><div class="miniapp-brand"><div class="brand-icon"><i class="fas fa-cube"></i></div><span style="color:${style.textColor};">${brandLabel} · ${productLabel}</span></div><span class="miniapp-btn" style="background:${style.titleColor};">打开小程序</span></div>
+                    </div>
+                `;
+            } else if (touchType === 'official') {
+                cardHtml = renderOfficialLong(title, body, imgUrl, brandLabel, productLabel, nodeLabel);
+            } else if (touchType === 'group') {
+                cardHtml = `
+                    <div class="preview-card group" style="font-family:${style.fontFamily}; border-color:${style.borderColor}; box-shadow:${style.boxShadow};">
+                        <div class="group-header">
+                            <div class="group-avatar"><i class="fas fa-users"></i></div>
+                            <span class="group-name" style="color:${style.titleColor};">${brandLabel} · 私域福利群</span>
+                            <span class="group-member"><i class="fas fa-user"></i> 128人</span>
+                        </div>
+                        <div class="group-sender" style="color:${style.metaColor};">${brandLabel} 内容运营 · 14:32</div>
+                        <div class="group-text" style="color:${style.textColor};">${body}</div>
+                        <div class="group-card">
+                            <div class="group-card-img" style="background-image:url(${imgUrl});"></div>
+                            <div class="group-card-info">
+                                <div class="group-card-title" style="color:${style.titleColor};">${title}</div>
+                                <div class="group-card-desc" style="color:${style.textColor};">${body.length > 30 ? body.slice(0,30)+'…' : body}</div>
+                            </div>
+                        </div>
+                        <div class="group-footer" style="color:${style.metaColor};">
+                            <span><i class="far fa-comment"></i> 3</span>
+                            <span><i class="far fa-heart"></i> 8</span>
+                            <span><i class="fas fa-share"></i> 分享</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                cardHtml = `
+                    <div class="preview-card default-preview" style="font-family:${style.fontFamily}; border-color:${style.borderColor}; box-shadow:${style.boxShadow};">
+                        <div class="card-img" style="background-image:url(${imgUrl}); background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; color:#fff; font-size:40px;">
+                            <i class="fas fa-image"></i><span style="position:absolute; bottom:10px; background:rgba(0,0,0,0.5); padding:2px 12px; border-radius:12px; font-size:12px;">${touchLabel}</span>
+                        </div>
+                        <div class="card-body"><div class="card-title" style="color:${style.titleColor}; font-size:${style.titleSize};">${title}</div><div class="card-text" style="color:${style.textColor}; font-size:${style.textSize};">${body}</div>
+                        <div class="card-meta" style="color:${style.metaColor};"><span><i class="fas fa-building"></i> ${brandLabel}</span><span><i class="fas fa-box"></i> ${productLabel}</span><span><i class="fas fa-bullseye"></i> ${touchLabel}</span>${audLabel ? `<span><i class="fas fa-users"></i> ${audLabel}</span>` : ''}${nodeLabel ? `<span><i class="fas fa-calendar"></i> ${nodeLabel}</span>` : ''}</div></div>
+                    </div>
+                `;
+            }
+
+            previewModalBody.innerHTML = cardHtml;
+            previewModal.classList.add('open');
+        }
+
+        function closePreviewModal() { previewModal.classList.remove('open'); }
+
+        function toggleFavorite(id) {
+            const item = contentItems.find(i => i.id === id);
+            if (!item) return;
+            item.favorite = !item.favorite;
+            renderCardGrid();
+            showToast(item.favorite ? '⭐ 已收藏' : '☆ 已取消收藏', 'info');
+        }
+
+        function openGenerateView() {
+            listView.style.display = 'none';
+            generateView.classList.add('active');
+            if (!state.brand && !state.product) {
+                renderTemplates();
+                renderPreview(true);
+            }
+        }
+
+        function goToList() {
+            listView.style.display = 'flex';
+            generateView.classList.remove('active');
+            renderCardGrid();
+            editingCardId = null;
+        }
+
+        function confirmCloseGenerate() {
+            const hasContent = Object.keys(state.touchCopy).length > 0 || generatedImages.length > 0;
+            if (!hasContent) { goToList(); return; }
+            document.getElementById('confirmCloseOverlay').classList.add('open');
+        }
+
+        function closeConfirmClose() {
+            pendingListTab = null;
+            document.getElementById('confirmCloseOverlay').classList.remove('open');
+        }
+
+        function doCloseGenerate() {
+            document.getElementById('confirmCloseOverlay').classList.remove('open');
+            const tab = pendingListTab;
+            pendingListTab = null;
+            goToList();
+            if (tab) applyListTab(tab);
+            showToast('已关闭编辑', 'info');
+        }
+
+        // ===== TEMPLATES =====
+        function renderTemplates() {
+            const container = $('templateContainer');
+            container.innerHTML = '';
+            const brand = brandSel.value;
+            const product = productSel.value;
+            if (!brand || !product) {
+                container.innerHTML = '<div class="template-empty">请选择品牌和产品线以查看图文模板</div>';
+                return;
+            }
+            templateList.forEach((t, idx) => {
+                const div = document.createElement('div');
+                div.className = `template-card ${idx === 0 ? 'active' : ''}`;
+                div.dataset.template = t.preview;
+                const previewBox = document.createElement('div');
+                previewBox.className = 'preview-box';
+                let style = 'background:#f8f6f2;';
+                let lines = '<div class="line primary"></div><div class="line"></div><div class="line dark"></div>';
+                if (t.preview === 'warm') {
+                    style = 'background:#fdf3e8;';
+                    lines =
+                        '<div class="line" style="background:#e67e22;width:60%;"></div><div class="line" style="background:#f39c12;width:80%;"></div><div class="line" style="background:#d35400;width:40%;"></div>';
+                } else if (t.preview === 'premium') {
+                    style = 'background:#f0efe8;';
+                    lines =
+                        '<div class="line dark" style="width:90%;"></div><div class="line" style="background:#b8860b;width:40%;"></div><div class="line dark" style="width:70%;"></div>';
+                } else if (t.preview === 'festive') {
+                    style = 'background:#fdf0ee;';
+                    lines =
+                        '<div class="line" style="background:#c0392b;width:65%;"></div><div class="line" style="background:#e74c3c;width:80%;"></div><div class="line" style="background:#922b21;width:45%;"></div>';
+                } else if (t.preview === 'nature') {
+                    style = 'background:#e8f5e9;';
+                    lines =
+                        '<div class="line" style="background:#43a047;width:70%;"></div><div class="line" style="background:#66bb6a;width:50%;"></div><div class="line dark" style="width:60%;"></div>';
+                }
+                previewBox.style.cssText = style;
+                previewBox.innerHTML = lines;
+                div.appendChild(previewBox);
+                const nameSpan = document.createElement('div');
+                nameSpan.className = 'tpl-name';
+                nameSpan.textContent = t.name;
+                div.appendChild(nameSpan);
+                const check = document.createElement('div');
+                check.className = 'check-badge';
+                check.innerHTML = '<i class="fas fa-check"></i>';
+                div.appendChild(check);
+                div.onclick = () => selectTemplate(div);
+                container.appendChild(div);
+            });
+            const first = container.querySelector('.template-card');
+            if (first) {
+                document.querySelectorAll('.template-card').forEach(el => el.classList.remove('active'));
+                first.classList.add('active');
+                state.template = first.dataset.template;
+            }
+        }
+
+        function selectTemplate(el) {
+            document.querySelectorAll('.template-card').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            state.template = el.dataset.template;
+            if (Object.keys(state.touchCopy).length > 0) renderPreview(false);
+        }
+
+        function updateTouchSwitcher() {
+            touchSwitcher.innerHTML = '';
+            const touchMap = { 'wecom': '企微', 'moments': '朋友圈', 'group': '私域群', 'miniapp': '小程序', 'official': '公众号' };
+            const touches = state.touchpoints.length > 0 ? state.touchpoints : ['wecom'];
+            touches.forEach(val => {
+                const label = touchMap[val] || val;
+                const tab = document.createElement('span');
+                tab.className = `touch-tab ${val === activeTouch ? 'active' : ''}`;
+                tab.textContent = label;
+                tab.dataset.value = val;
+                tab.onclick = () => {
+                    activeTouch = val;
+                    touchSwitcher.querySelectorAll('.touch-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    if (Object.keys(state.touchCopy).length > 0) renderPreview(false);
+                };
+                touchSwitcher.appendChild(tab);
+            });
+        }
+
+        // ===== CHAR COUNT =====
+        function updateCharCount() {
+            $('titleCount').textContent = `${titleInp.value.length}/30`;
+            $('bodyCount').textContent = `${bodyInp.value.length}/200`;
+        }
+        titleInp.addEventListener('input', () => {
+            updateCharCount();
+            if (activeTouch && state.touchCopy[activeTouch]) state.touchCopy[activeTouch].title = titleInp.value;
+            syncCurrentCopyVersion();
+            if (Object.keys(state.touchCopy).length > 0) renderPreview(false);
+        });
+        bodyInp.addEventListener('input', () => {
+            updateCharCount();
+            if (activeTouch && state.touchCopy[activeTouch]) state.touchCopy[activeTouch].body = bodyInp.value;
+            syncCurrentCopyVersion();
+            if (Object.keys(state.touchCopy).length > 0) renderPreview(false);
+        });
+
+        // ===== IMAGES =====
+        function updateImageHistoryHint() {
+            const hint = $('imageHistoryHint');
+            if (hint) hint.hidden = generatedImages.length <= 5;
+        }
+
+        function prependImages(newImgs) {
+            const keepId = state.imageId;
+            newImgs.forEach(img => {
+                generatedImages = generatedImages.filter(g => g.id !== img.id);
+            });
+            generatedImages = [...newImgs, ...generatedImages];
+            while (generatedImages.length > MAX_IMAGE_HISTORY) {
+                let dropIdx = generatedImages.length - 1;
+                while (dropIdx >= 0 && generatedImages[dropIdx].id === keepId) dropIdx--;
+                if (dropIdx < 0) break;
+                generatedImages.splice(dropIdx, 1);
+            }
+        }
+
+        function renderImageOptions() {
+            imagePreviewGrid.innerHTML = '';
+            updateImageHistoryHint();
+            if (generatedImages.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'image-option';
+                empty.style.width = '100%';
+                empty.style.height = '72px';
+                empty.style.border = '1px dashed var(--gray-300)';
+                empty.style.color = 'var(--gray-400)';
+                empty.style.background = 'transparent';
+                empty.style.cursor = 'default';
+                empty.style.flex = '1 1 auto';
+                empty.textContent = '可通过 AI生成、垫图生成或选择 CEM 素材添加配图';
+                imagePreviewGrid.appendChild(empty);
+                return;
+            }
+            generatedImages.forEach((img) => {
+                const div = document.createElement('div');
+                div.className = `image-option ${img.id === state.imageId ? 'selected' : ''}`;
+                div.style.backgroundImage = `url(${img.imageUrl})`;
+                div.style.backgroundSize = 'cover';
+                div.innerHTML =
+                    `<i class="fas ${img.icon}"></i><span class="img-label">${img.label}</span><div class="check-badge"><i class="fas fa-check"></i></div>`;
+                div.onclick = () => { state.imageId = img.id;
+                    renderImageOptions();
+                    renderPreview(false);
+                    showToast(`选择配图：${img.label}`, 'info'); };
+                imagePreviewGrid.appendChild(div);
+            });
+        }
+
+        function handleGenerateImages() {
+            if (isGenerating) return;
+            if (!state.brand || !state.product) { showToast('⚠️ 请先选择品牌和产品线', 'warning'); return; }
+            isGenerating = true;
+            const btn = document.querySelector('.image-actions .btn-primary');
+            if (btn) { btn.disabled = true;
+                btn.innerHTML = '<span class="spinner"></span> 生成中'; }
+            setTimeout(() => {
+                let pool = assetLibrary;
+                if (state.brand) pool = pool.filter(a => a.brand === state.brand);
+                if (pool.length < 5) pool = assetLibrary;
+                const shuffled = [...pool].sort(() => 0.5 - Math.random());
+                const selected = shuffled.slice(0, 5);
+                prependImages(selected);
+                state.imageId = selected[0].id;
+                renderImageOptions();
+                renderPreview(false);
+                showToast(`🎨 生成5张配图，请点击选择`, 'success');
+                if (btn) { btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> AI生成'; }
+                isGenerating = false;
+            }, 1200);
+        }
+
+        function getFilteredSelectorAssets() {
+            const q = ($('assetSearchInput')?.value || '').trim().toLowerCase();
+            const creator = $('assetFilterCreator')?.value || '';
+            return assetSelectorLibrary.filter(item => {
+                if (creator && item.creator !== creator) return false;
+                if (q && !(`${item.label} ${item.format} ${item.creator}`).toLowerCase().includes(q)) return false;
+                return true;
+            });
+        }
+
+        function updateAssetSelectionUI() {
+            const count = selectedAssetId === null ? 0 : 1;
+            const countEl = $('assetSelectedCount');
+            const badge = $('assetFileBadge');
+            const confirmBtn = $('assetConfirmBtn');
+            if (countEl) countEl.textContent = String(count);
+            if (badge) badge.textContent = String(count);
+            if (confirmBtn) confirmBtn.disabled = count === 0;
+        }
+
+        function openPadImagePicker() {
+            openAssetSelector('pad');
+        }
+
+        // ===== ASSET SELECTOR =====
+        function openAssetSelector(mode = 'library') {
+            if (!state.brand || !state.product) { showToast('⚠️ 请先选择品牌和产品线', 'warning'); return; }
+            assetSelectorMode = mode === 'pad' ? 'pad' : 'library';
+            assetPage = 1;
+            selectedAssetId = null;
+            if ($('assetSearchInput')) $('assetSearchInput').value = '';
+            renderAssetSelectorPage();
+            assetModal.classList.add('open');
+            updateAssetSelectionUI();
+        }
+
+        function filterAssetSelector() {
+            assetPage = 1;
+            renderAssetSelectorPage();
+        }
+
+        function clearAssetFilters() {
+            if ($('assetSearchInput')) $('assetSearchInput').value = '';
+            if ($('assetFilterCreator')) $('assetFilterCreator').value = '';
+            if ($('assetFilterFormat')) $('assetFilterFormat').selectedIndex = 0;
+            filterAssetSelector();
+        }
+
+        function renderAssetSelectorPage() {
+            const list = getFilteredSelectorAssets();
+            $('totalAssetCount').textContent = list.length;
+            const start = (assetPage - 1) * pageSize;
+            const pageItems = list.slice(start, start + pageSize);
+            assetGrid.innerHTML = '';
+            pageItems.forEach(item => {
+                const div = document.createElement('div');
+                div.className = `asset-item ${item.id === selectedAssetId ? 'selected' : ''}`;
+                div.dataset.id = item.id;
+                div.innerHTML = `
+                    <div class="thumb" style="background-image:url(${item.imageUrl});">
+                        <span class="radio"></span>
+                        <span class="eye"><i class="far fa-eye"></i></span>
+                    </div>
+                    <div class="info"><div class="name">${item.label}</div><div class="meta"><span>${item.format}</span><span>${item.size}</span></div></div>
+                `;
+                div.onclick = () => {
+                    selectedAssetId = item.id;
+                    renderAssetSelectorPage();
+                    updateAssetSelectionUI();
+                };
+                assetGrid.appendChild(div);
+            });
+            const totalPages = Math.ceil(list.length / pageSize) || 1;
+            document.getElementById('pageInfo').textContent = `第 ${assetPage} / ${totalPages} 页`;
+            document.getElementById('prevPageBtn').disabled = assetPage <= 1;
+            document.getElementById('nextPageBtn').disabled = assetPage >= totalPages;
+            updateAssetSelectionUI();
+        }
+
+        function changeAssetPage(delta) {
+            const totalPages = Math.ceil(getFilteredSelectorAssets().length / pageSize) || 1;
+            const newPage = assetPage + delta;
+            if (newPage < 1 || newPage > totalPages) return;
+            assetPage = newPage;
+            renderAssetSelectorPage();
+        }
+
+        function closeAssetSelector() { assetModal.classList.remove('open');
+            selectedAssetId = null;
+            updateAssetSelectionUI(); }
+
+        function confirmAssetSelect() {
+            if (selectedAssetId === null) { showToast('请先选择一张素材', 'warning'); return; }
+            const img = assetSelectorLibrary.find(i => i.id === selectedAssetId);
+            if (img) {
+                const isPad = assetSelectorMode === 'pad';
+                const shuffled = [...assetLibrary].filter(i => i.id !== img.id).sort(() => 0.5 - Math.random());
+                const variants = shuffled.slice(0, 4);
+                const main = {
+                    ...img,
+                    icon: isPad ? 'fa-pen-fancy' : 'fa-folder-open',
+                    label: isPad ? ('垫图: ' + img.label) : img.label
+                };
+                prependImages([main, ...variants]);
+                state.imageId = main.id;
+                renderImageOptions();
+                renderPreview(false);
+                showToast(isPad ? `✅ 已以「${img.label}」为垫图生成配图` : `✅ 已从素材库选择「${img.label}」并生成配图`, 'success');
+            }
+            closeAssetSelector();
+        }
+
+        function snippet(text, max = 22) {
+            const t = (text || '').trim();
+            return t.length > max ? t.slice(0, max) + '…' : t;
+        }
+
+        function renderCopyVersions() {
+            const wrap = $('copyHistoryWrap');
+            const menu = $('copyHistoryMenu');
+            if (!wrap || !menu) return;
+            menu.innerHTML = '';
+            if (copyVersions.length === 0) {
+                wrap.classList.remove('visible', 'open');
+                return;
+            }
+            wrap.classList.add('visible');
+            const ordered = copyVersions.map((v, i) => ({ v, i })).reverse();
+            ordered.forEach(({ v, i }) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                const isCurrent = i === currentCopyVersion;
+                btn.className = `copy-history-item${isCurrent ? ' active' : ''}`;
+                btn.innerHTML = `
+                    <span class="h-top">
+                        <span>版本 ${v.n}</span>
+                        ${isCurrent ? '<span class="h-badge">使用中</span>' : ''}
+                    </span>
+                    <span class="h-title">${snippet(v.title) || '无标题'}</span>
+                    <span class="h-body">${snippet(v.body) || '无正文'}</span>
+                `;
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    restoreCopyVersion(i);
+                    wrap.classList.remove('open');
+                };
+                menu.appendChild(btn);
+            });
+        }
+
+        function toggleCopyHistory(e) {
+            if (e) e.stopPropagation();
+            const wrap = $('copyHistoryWrap');
+            if (!wrap || copyVersions.length === 0) return;
+            wrap.classList.toggle('open');
+        }
+
+        function pushCopyVersion(title, body) {
+            copyVersionSeq += 1;
+            copyVersions.push({ n: copyVersionSeq, title: title || '', body: body || '' });
+            if (copyVersions.length > MAX_COPY_VERSIONS) copyVersions.shift();
+            currentCopyVersion = copyVersions.length - 1;
+            renderCopyVersions();
+        }
+
+        function syncCurrentCopyVersion() {
+            if (currentCopyVersion < 0 || !copyVersions[currentCopyVersion]) return;
+            copyVersions[currentCopyVersion].title = titleInp.value;
+            copyVersions[currentCopyVersion].body = bodyInp.value;
+            renderCopyVersions();
+        }
+
+        function restoreCopyVersion(index) {
+            const version = copyVersions[index];
+            if (!version) return;
+            currentCopyVersion = index;
+            const touch = activeTouch || Object.keys(state.touchCopy)[0] || state.touchpoints[0] || 'wecom';
+            state.touchCopy[touch] = { title: version.title, body: version.body };
+            renderPreview(false);
+            renderCopyVersions();
+            showToast(`已切回版本 ${version.n}`, 'info');
+        }
+
+        // ===== GENERATE =====
+        function handleGenerate() {
+            if (isGenerating) return;
+            if (!state.brand || !state.product) { showToast('⚠️ 请至少选择品牌和产品线', 'warning'); return; }
+            const touches = state.touchpoints.length > 0 ? state.touchpoints : ['wecom', 'moments', 'miniapp', 'group',
+                'official'
+            ];
+            isGenerating = true;
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<span class="spinner"></span> 生成中...';
+            titleInp.placeholder = 'AI 正在检索语料...';
+            bodyInp.placeholder = 'AI 正在总结生成...';
+            titleInp.disabled = true;
+            bodyInp.disabled = true;
+            setTimeout(() => {
+                const copyPools = {
+                    'wecom': [{ title: '月满中秋，爱他美 GOAT 臻选',
+                            body: '中秋月圆，爱他美 GOAT 以臻稀营养守护宝宝成长。科学配比 DHA & 益生元，助力6-12月龄宝宝感知世界。#爱他美 #中秋' },
+                        { title: '中秋臻礼 · 爱他美 GOAT',
+                            body: '爱他美 GOAT 中秋献礼，源自纯净牧场，为宝宝送上臻稀营养。愿每个宝贝都在爱中茁壮成长。' },
+                        { title: 'GOAT 中秋，爱意满满',
+                            body: '爱他美 GOAT 臻选系列，以纯净营养陪伴宝宝探索世界。DHA + 益生元双重守护，团圆时刻，爱更浓。' }
+                    ],
+                    'moments': [{ title: '月满中秋，爱他美™ GOAT 臻选呵护',
+                            body: '中秋月圆，爱他美 GOAT 以臻稀营养守护宝宝成长。源自纯净牧场，科学配比 DHA & 益生元，助力 6-12 月龄宝宝感知世界。这个中秋，让爱圆满，让成长加倍。#爱他美 #中秋 #GOAT' },
+                        { title: '中秋臻礼 · 爱他美 GOAT 守护成长',
+                            body: '月圆人团圆，爱他美 GOAT 为宝宝送上臻稀营养。每一滴都蕴含自然精华，科学配方支持认知与免疫发育。中秋佳节，愿每个宝贝都在爱中茁壮成长。' },
+                        { title: '爱他美 GOAT | 中秋月圆，爱意满满',
+                            body: '中秋佳节，爱他美 GOAT 臻选系列，以纯净营养陪伴宝宝探索世界。DHA + 益生元双重守护，让 6-12 月龄的成长每一步都坚实有力。团圆时刻，爱更浓。' }
+                    ],
+                    'official': [{ title: '臻稀营养，爱他美 GOAT 伴月成长',
+                            body: '爱他美 GOAT 中秋献礼：源自天然牧场，科学营养配比，为 6-12 月宝宝打造专属呵护。月满情更满，让成长不留遗憾。点击了解详情。#爱他美 #中秋' },
+                        { title: '爱他美 GOAT 中秋特辑：营养与爱同行',
+                            body: '中秋月圆，爱他美 GOAT 以自然之礼，呵护宝贝每一刻。科学营养矩阵，助力 6-12 月龄宝宝认知与体格双发展。这个中秋，让爱更臻贵。欢迎咨询选购。' },
+                        { title: '中秋臻享 · 爱他美 GOAT 品质之选',
+                            body: '爱他美 GOAT 系列，源自欧洲纯净牧场，先进科研配方，为宝宝成长提供全面营养支持。中秋佳节，选择爱他美，让爱与健康常伴。' }
+                    ],
+                    'miniapp': [{ title: '爱他美 GOAT 中秋礼遇',
+                            body: '爱他美 GOAT 中秋专场，臻稀营养守护宝宝成长。点击进入小程序，领取专属优惠。' },
+                        { title: '中秋 GOAT 臻选，即刻开启',
+                            body: '爱他美 GOAT 系列小程序专享，科学配方，纯净营养。中秋好礼，尽在指尖。' }
+                    ],
+                    'group': [{ title: '爱他美 GOAT 中秋福利',
+                            body: '群内专享：爱他美 GOAT 中秋特惠，臻稀营养助力宝宝成长。私域专属，不容错过。' },
+                        { title: 'GOAT 中秋，群内专享',
+                            body: '爱他美 GOAT 系列，群友专享价。天然牧场，科学配方，守护宝宝每一天。' }
+                    ]
+                };
+                const touchCopy = {};
+                touches.forEach(t => {
+                    const pool = copyPools[t] || copyPools['moments'];
+                    const pick = pool[Math.floor(Math.random() * pool.length)];
+                    touchCopy[t] = { title: pick.title, body: pick.body };
+                });
+                state.touchCopy = touchCopy;
+                let pool = assetLibrary;
+                if (state.brand) pool = pool.filter(a => a.brand === state.brand);
+                if (pool.length < 5) pool = assetLibrary;
+                const shuffled = [...pool].sort(() => 0.5 - Math.random());
+                const selected = shuffled.slice(0, 5);
+                prependImages(selected);
+                state.imageId = selected[0].id;
+                if (touches.length > 0) activeTouch = touches[0];
+                updateTouchSwitcher();
+                renderImageOptions();
+                renderPreview(false);
+                const firstKey = touches[0] || 'wecom';
+                const firstCopy = touchCopy[firstKey] || { title: '', body: '' };
+                pushCopyVersion(firstCopy.title, firstCopy.body);
+                showToast(`✨ 生成成功！为 ${touches.length} 个传播渠道生成差异化文案`, 'success');
+                titleInp.disabled = false;
+                bodyInp.disabled = false;
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> 生成内容';
+                isGenerating = false;
+            }, 1800);
+        }
+
+        function handleRegenerate() {
+            if (isGenerating) return;
+            if (!state.brand || !state.product || Object.keys(state.touchCopy).length === 0) { showToast('⚠️ 请先生成初始内容',
+                    'warning'); return; }
+            isGenerating = true;
+            const btn = $('regenerateBtn');
+            if (btn) { btn.disabled = true;
+                btn.innerHTML = '<span class="spinner"></span>'; }
+            setTimeout(() => {
+                const touches = Object.keys(state.touchCopy);
+                const copyPools = {
+                    'wecom': [{ title: '月满中秋，爱他美 GOAT 臻选',
+                            body: '中秋月圆，爱他美 GOAT 以臻稀营养守护宝宝成长。科学配比 DHA & 益生元，助力6-12月龄宝宝感知世界。#爱他美 #中秋' },
+                        { title: '中秋臻礼 · 爱他美 GOAT',
+                            body: '爱他美 GOAT 中秋献礼，源自纯净牧场，为宝宝送上臻稀营养。愿每个宝贝都在爱中茁壮成长。' },
+                        { title: 'GOAT 中秋，爱意满满',
+                            body: '爱他美 GOAT 臻选系列，以纯净营养陪伴宝宝探索世界。DHA + 益生元双重守护，团圆时刻，爱更浓。' }
+                    ],
+                    'moments': [{ title: '月满中秋，爱他美™ GOAT 臻选呵护',
+                            body: '中秋月圆，爱他美 GOAT 以臻稀营养守护宝宝成长。源自纯净牧场，科学配比 DHA & 益生元，助力 6-12 月龄宝宝感知世界。这个中秋，让爱圆满，让成长加倍。#爱他美 #中秋 #GOAT' },
+                        { title: '中秋臻礼 · 爱他美 GOAT 守护成长',
+                            body: '月圆人团圆，爱他美 GOAT 为宝宝送上臻稀营养。每一滴都蕴含自然精华，科学配方支持认知与免疫发育。中秋佳节，愿每个宝贝都在爱中茁壮成长。' },
+                        { title: '爱他美 GOAT | 中秋月圆，爱意满满',
+                            body: '中秋佳节，爱他美 GOAT 臻选系列，以纯净营养陪伴宝宝探索世界。DHA + 益生元双重守护，让 6-12 月龄的成长每一步都坚实有力。团圆时刻，爱更浓。' }
+                    ],
+                    'official': [{ title: '臻稀营养，爱他美 GOAT 伴月成长',
+                            body: '爱他美 GOAT 中秋献礼：源自天然牧场，科学营养配比，为 6-12 月宝宝打造专属呵护。月满情更满，让成长不留遗憾。点击了解详情。#爱他美 #中秋' },
+                        { title: '爱他美 GOAT 中秋特辑：营养与爱同行',
+                            body: '中秋月圆，爱他美 GOAT 以自然之礼，呵护宝贝每一刻。科学营养矩阵，助力 6-12 月龄宝宝认知与体格双发展。这个中秋，让爱更臻贵。欢迎咨询选购。' },
+                        { title: '中秋臻享 · 爱他美 GOAT 品质之选',
+                            body: '爱他美 GOAT 系列，源自欧洲纯净牧场，先进科研配方，为宝宝成长提供全面营养支持。中秋佳节，选择爱他美，让爱与健康常伴。' }
+                    ],
+                    'miniapp': [{ title: '爱他美 GOAT 中秋礼遇',
+                            body: '爱他美 GOAT 中秋专场，臻稀营养守护宝宝成长。点击进入小程序，领取专属优惠。' },
+                        { title: '中秋 GOAT 臻选，即刻开启',
+                            body: '爱他美 GOAT 系列小程序专享，科学配方，纯净营养。中秋好礼，尽在指尖。' }
+                    ],
+                    'group': [{ title: '爱他美 GOAT 中秋福利',
+                            body: '群内专享：爱他美 GOAT 中秋特惠，臻稀营养助力宝宝成长。私域专属，不容错过。' },
+                        { title: 'GOAT 中秋，群内专享',
+                            body: '爱他美 GOAT 系列，群友专享价。天然牧场，科学配方，守护宝宝每一天。' }
+                    ]
+                };
+                const newCopy = {};
+                touches.forEach(t => {
+                    const pool = copyPools[t] || copyPools['moments'];
+                    const pick = pool[Math.floor(Math.random() * pool.length)];
+                    newCopy[t] = { title: pick.title, body: pick.body };
+                });
+                state.touchCopy = newCopy;
+                renderPreview(false);
+                const firstKey = touches[0] || 'wecom';
+                const firstCopy = newCopy[firstKey] || { title: '', body: '' };
+                pushCopyVersion(firstCopy.title, firstCopy.body);
+                showToast('🔄 所有传播渠道的文案已重新生成', 'info');
+                if (btn) { btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-rotate"></i> 重新生成'; }
+                isGenerating = false;
+            }, 700);
+        }
+
+        // ===== SAVE =====
+        function handleSaveOnly() {
+            if (Object.keys(state.touchCopy).length === 0 || !state.imageId) { showToast('⚠️ 没有可保存的内容', 'warning'); return; }
+            const touch = activeTouch || 'wecom';
+            const copy = state.touchCopy[touch] || { title: '', body: '' };
+            const imgAsset = assetLibrary.find(i => i.id === state.imageId) || assetLibrary[0];
+            if (editingCardId !== null) {
+                const item = contentItems.find(i => i.id === editingCardId);
+                if (item) {
+                    item.title = copy.title;
+                    item.desc = copy.body.length > 60 ? copy.body.slice(0, 60) + '…' : copy.body;
+                    item.fullTitle = copy.title;
+                    item.fullBody = copy.body;
+                    item.touch = touch;
+                    item.node = state.node || 'midautumn';
+                    item.audience = state.audience || '6-12';
+                    item.brand = state.brand;
+                    item.product = state.product;
+                    item.image = imgAsset.imageUrl;
+                    item.imageId = imgAsset.id;
+                    item.template = state.template;
+                    showToast('✅ 内容已更新', 'success');
+                    editingCardId = null;
+                    goToList();
+                    return;
+                }
+            }
+            const newItem = {
+                id: Date.now(),
+                title: copy.title,
+                desc: copy.body.length > 60 ? copy.body.slice(0, 60) + '…' : copy.body,
+                fullTitle: copy.title,
+                fullBody: copy.body,
+                touch: touch,
+                node: state.node || 'midautumn',
+                audience: state.audience || '6-12',
+                brand: state.brand,
+                product: state.product,
+                image: imgAsset.imageUrl,
+                imageId: imgAsset.id,
+                template: state.template,
+                status: 'out',
+                favorite: false,
+                creator: 'JOJO',
+                createdAt: new Date().toISOString().slice(0, 10)
+            };
+            contentItems.unshift(newItem);
+            updateCounts();
+            showToast('✅ 内容已保存并添加到列表', 'success');
+            goToList();
+        }
+
+        function handleSave() {
+            if (Object.keys(state.touchCopy).length === 0 || !state.imageId) { showToast('⚠️ 没有可保存的内容', 'warning'); return; }
+            const overlay = document.getElementById('savingOverlay');
+            overlay.classList.add('open');
+            setTimeout(() => {
+                overlay.classList.remove('open');
+                document.getElementById('libraryModal').classList.add('open');
+                const touch = activeTouch || 'wecom';
+                const copy = state.touchCopy[touch] || { title: '', body: '' };
+                const imgAsset = assetLibrary.find(i => i.id === state.imageId) || assetLibrary[0];
+                if (editingCardId !== null) {
+                    const item = contentItems.find(i => i.id === editingCardId);
+                    if (item) {
+                        item.title = copy.title;
+                        item.desc = copy.body.length > 60 ? copy.body.slice(0, 60) + '…' : copy.body;
+                        item.fullTitle = copy.title;
+                        item.fullBody = copy.body;
+                        item.touch = touch;
+                        item.node = state.node || 'midautumn';
+                        item.audience = state.audience || '6-12';
+                        item.brand = state.brand;
+                        item.product = state.product;
+                        item.image = imgAsset.imageUrl;
+                        item.imageId = imgAsset.id;
+                        item.template = state.template;
+                        item.status = 'in';
+                        showToast('✅ 内容已更新并入库', 'success');
+                        editingCardId = null;
+                        goToList();
+                        return;
+                    }
+                }
+                const newItem = {
+                    id: Date.now(),
+                    title: copy.title,
+                    desc: copy.body.length > 60 ? copy.body.slice(0, 60) + '…' : copy.body,
+                    fullTitle: copy.title,
+                    fullBody: copy.body,
+                    touch: touch,
+                    node: state.node || 'midautumn',
+                    audience: state.audience || '6-12',
+                    brand: state.brand,
+                    product: state.product,
+                    image: imgAsset.imageUrl,
+                    imageId: imgAsset.id,
+                    template: state.template,
+                    status: 'in',
+                    favorite: false,
+                    creator: 'JOJO',
+                    createdAt: new Date().toISOString().slice(0, 10)
+                };
+                contentItems.unshift(newItem);
+                updateCounts();
+                showToast('✅ 内容已入库并添加到列表', 'success');
+                goToList();
+            }, 1500);
+        }
+
+        function closeLibraryModal() { document.getElementById('libraryModal').classList.remove('open'); }
+
+        function clearCopy() {
+            state.touchCopy = {};
+            titleInp.value = '';
+            bodyInp.value = '';
+            currentCopyVersion = -1;
+            updateCharCount();
+            renderCopyVersions();
+            renderPreview(true);
+            showToast('🧹 文案已清空，可从生成历史找回', 'info');
+        }
+
+        function onFilterChange() {
+            state.brand = brandSel.value;
+            state.product = productSel.value;
+            const touch = touchSel.value;
+            state.touchpoints = touch ? [touch] : [];
+            state.node = nodeSel.value;
+            state.audience = audSel.value;
+            activeTouch = touch || 'wecom';
+            updateTouchSwitcher();
+            renderTemplates();
+            if (!state.brand || !state.product) renderPreview(true);
+            else if (Object.keys(state.touchCopy).length > 0) renderPreview(false);
+        }
+
+        // ===== UTILITY =====
+        function syncData() { showToast('🔄 已同步素材库最新数据', 'success'); }
+
+        function showToast(msg, type = 'info') {
+            const container = $('toastContainer');
+            const t = document.createElement('div');
+            t.className = `toast ${type}`;
+            const map = { success: 'fa-circle-check', warning: 'fa-triangle-exclamation', info: 'fa-circle-info' };
+            t.innerHTML = `<i class="fas ${map[type] || map.info}"></i> ${msg}`;
+            container.appendChild(t);
+            setTimeout(() => { t.style.opacity = '0';
+                t.style.transform = 'translateX(20px)';
+                t.style.transition = '0.3s';
+                setTimeout(() => t.remove(), 350); }, 3000);
+        }
+
+        // ===== EXPOSE =====
+        window.selectTemplate = selectTemplate;
+        window.onFilterChange = onFilterChange;
+        window.handleGenerate = handleGenerate;
+        window.handleRegenerate = handleRegenerate;
+        window.handleGenerateImages = handleGenerateImages;
+        window.openAssetSelector = openAssetSelector;
+        window.closeAssetSelector = closeAssetSelector;
+        window.confirmAssetSelect = confirmAssetSelect;
+        window.changeAssetPage = changeAssetPage;
+        window.openPadImagePicker = openPadImagePicker;
+        window.filterAssetSelector = filterAssetSelector;
+        window.clearAssetFilters = clearAssetFilters;
+        window.restoreCopyVersion = restoreCopyVersion;
+        window.toggleCopyHistory = toggleCopyHistory;
+        window.handleSaveOnly = handleSaveOnly;
+        window.handleSave = handleSave;
+        window.closeLibraryModal = closeLibraryModal;
+        window.clearCopy = clearCopy;
+        window.syncData = syncData;
+        window.goToList = goToList;
+        window.openGenerateView = openGenerateView;
+        window.switchListTab = switchListTab;
+        window.setListFilter = setListFilter;
+        window.setStatusFilter = setStatusFilter;
+        window.filterList = filterList;
+        window.editCard = editCard;
+        window.previewCard = previewCard;
+        window.toggleFavorite = toggleFavorite;
+        window.closePreviewModal = closePreviewModal;
+        window.renderCardGrid = renderCardGrid;
+        window.saveCardToLibrary = saveCardToLibrary;
+        window.confirmCloseGenerate = confirmCloseGenerate;
+        window.closeConfirmClose = closeConfirmClose;
+        window.doCloseGenerate = doCloseGenerate;
+
+        // ===== INIT =====
+        function init() {
+            document.addEventListener('click', (e) => {
+                const wrap = $('copyHistoryWrap');
+                if (wrap && !wrap.contains(e.target)) wrap.classList.remove('open');
+            });
+            restoreSidebarState();
+            listView.style.display = 'flex';
+            generateView.classList.remove('active');
+            renderCardGrid();
+            brandSel.value = '';
+            productSel.value = '';
+            touchSel.value = '';
+            nodeSel.value = '';
+            audSel.value = '';
+            titleInp.value = '';
+            bodyInp.value = '';
+            updateCharCount();
+            state.imageId = null;
+            state.touchpoints = [];
+            state.node = '';
+            state.audience = '';
+            state.touchCopy = {};
+            generatedImages = [];
+            copyVersions = [];
+            currentCopyVersion = -1;
+            copyVersionSeq = 0;
+            renderImageOptions();
+            renderCopyVersions();
+            renderPreview(true);
+            renderTemplates();
+            activeTouch = 'wecom';
+            updateTouchSwitcher();
+            // 默认状态筛选全选
+            document.querySelectorAll('.list-filter-bar .tag[data-status]').forEach(t => t.classList.remove('active'));
+            document.querySelector('.list-filter-bar .tag[data-status="all"]').classList.add('active');
+            showToast('📋 欢迎！左侧列表管理内容，右上角「制作内容」生成新内容', 'info');
+        }
+        init();
+    </script>
+</body>
+</html>
